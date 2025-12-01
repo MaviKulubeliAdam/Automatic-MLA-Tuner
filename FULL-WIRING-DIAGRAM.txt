@@ -1,0 +1,830 @@
+# MANYETİK LOOP AUTO-TUNER - DETAYLI BAĞLANTI ŞEMASI
+# Tüm Sistem - Her Parça ve Kablo
+# DDS: AD9833 (0-12.5 MHz, Direkt Sinüs Çıkışı)
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    MANYETİK LOOP AUTO-TUNER SİSTEM DİYAGRAMI                  ║
+║                    v4.0 FINAL - AD9833 DDS İLE                                 ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          GÜÇ KAYNAKLARI                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────┐                 ┌──────────────┐
+    │  12V/2A PSU  │                 │   5V/2A PSU  │
+    │  (RF Amp)    │                 │  (Arduino)   │
+    └──────┬───────┘                 └──────┬───────┘
+           │                                │
+      12V──┤                           5V──┤
+      GND──┤                          GND──┤
+           │                                │
+           │                                │
+           │         ORTAK GND              │
+           └────────────┬───────────────────┘
+                        │
+                     ═══╪═══  (Ground Bus)
+                        │
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ANA KONTROLÖR - ARDUINO MEGA 2560                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌─────────────────────────┐
+                        │   ARDUINO MEGA 2560     │
+                        │                         │
+    ┌───────────────────┤ VIN: 5V                 │
+    │                   │ GND: GND (Common)       │
+    │                   │                         │
+    │  DDS KONTROL      │ Pin 51 (MOSI)   ────────┼────┐
+    │  (SPI)            │ Pin 52 (SCK)    ────────┼────┼───┐
+    │                   │ Pin 53 (SS)     ────────┼────┼───┼───┐
+    │                   │ Pin 49          ────────┼────┼───┼───┼──┐
+    │                   │                         │    │   │   │  │
+    │  SWR ÖLÇÜM        │ A0 (Analog)     ────────┼────┼───┼───┼──┼──┐
+    │  (AD8307)         │ A1 (Analog)     ────────┼────┼───┼───┼──┼──┼──┐
+    │                   │                         │    │   │   │  │  │  │
+    │  MOTOR            │ Pin 4 (STEP)    ────────┼────┼───┼───┼──┼──┼──┼──┐
+    │  (TB6600)         │ Pin 3 (DIR)     ────────┼────┼───┼───┼──┼──┼──┼──┼──┐
+    │                   │ Pin 9 (ENABLE)  ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┐
+    │                   │                         │    │   │   │  │  │  │  │  │  │
+    │  RF AMP           │ Pin 10 (RF_EN)  ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │                         │    │   │   │  │  │  │  │  │  │  │
+    │  ENCODER          │ Pin 2 (CLK/INT) ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │ Pin 5 (DT)      ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │ Pin 6 (SW)      ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │                         │    │   │   │  │  │  │  │  │  │  │  │  │  │
+    │  BUTONLAR         │ Pin 7 (BTN_FWD) ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │ Pin 8 (BTN_REV) ────────┼────┼───┼───┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┼──┐
+    │                   │                         │    │   │   │  │  │  │  │  │  │  │  │  │  │  │  │
+    │                   │ USB (PC Seri)   ═══════ USB  │   │   │  │  │  │  │  │  │  │  │  │  │  │  │
+    │                   └─────────────────────────┘    │   │   │  │  │  │  │  │  │  │  │  │  │  │  │
+    │                                                   │   │   │  │  │  │  │  │  │  │  │  │  │  │  │
+    └───────────────────────────────────────────────────┘   │   │  │  │  │  │  │  │  │  │  │  │  │  │
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    DDS SİNYAL ÜRETİCİSİ - AD9833                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌────────────────────────────────────┐
+                    │     AD9833 MODÜL (Üstten Görünüş)  │
+                    ├────────────────────────────────────┤
+                    │  GND  PGA  SMA  VOUT  GND         │  ← Üst sıra
+                    │  CS   DAT  CLK  FSY   GND   VCC   │  ← Alt sıra
+                    └────────────────────────────────────┘
+
+         Pin Açıklamaları:
+         • VCC:  Arduino 5V       → Alt sıra, en sağ
+         • GND:  Arduino GND      → 4 adet (herhangi biri)
+         • FSY:  Arduino Pin 53   → Alt sıra (FSYNC)
+         • CLK:  Arduino Pin 52   → Alt sıra (SCLK)
+         • DAT:  Arduino Pin 51   → Alt sıra (SDATA)
+         • CS:   Boş bırak        → Alt sıra (kullanılmıyor)
+         • PGA:  Boş bırak        → Üst sıra (kullanılmıyor)
+         • VOUT: Test çıkışı      → Üst sıra (pin header)
+         • SMA:  RF çıkış ✓       → Üst sıra (dişi konnektör)
+
+                        ┌──────────────────────┐
+                        │    AD9833 Bağlantı   │
+                        │    Şema Detayı       │
+                        ├──────────────────────┤
+    Arduino 5V ────────►│ VCC (alt-sağ)        │
+    Arduino GND ───────►│ GND (4 pindenherhangi)│
+                        │                      │
+    Arduino Pin 51 ────►│ DAT (alt-2)          │
+    Arduino Pin 52 ────►│ CLK (alt-3)          │
+    Arduino Pin 53 ────►│ FSY (alt-4)          │
+                        │                      │
+                        │ CS  (alt-1) [Boş]    │
+                        │ PGA (üst-2) [Boş]    │
+                        │                      │
+                   ┌────┤ SMA Dişi (üst-3)     │
+                   │    │ [600mV p-p]          │
+                   │    │                      │
+                   │    │ VOUT (üst-4)─────────┼──┐ [Alternatif]
+                   │    └──────────────────────┘  │
+                   │                               │
+                   │ RF OUT (50Ω, Single-ended)    │
+                   │ [Direkt kullanıma hazır!]     │
+                   ▼                               ▼
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              RF AMPLIFIER - 1MHz-3000MHz Çin Klonu                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────────────────────┐
+                    │  RF AMP MODÜL (Üstten Görünüş)   │
+                    ├──────────────────────────────────┤
+                    │  GND   VCC   RFOUT   RFIN       │  ← Pinler
+                    └──────────────────────────────────┘
+
+         Pin Açıklamaları:
+         • VCC:   12V/2A güç      → Röle NO (Normally Open)
+         • GND:   Toprak          → Ortak GND bus
+         • RFIN:  RF girişi       → AD9833 SMA OUT
+         • RFOUT: RF çıkışı       → 20dB Attenuator
+
+         NOT: Enable pin YOK - Röle ile kontrol edilir!
+
+                        ┌──────────────────────┐
+                        │   RF AMPLIFIER       │
+                        │   1MHz-3GHz          │
+                        │   +20dB Kazanç       │
+                        ├──────────────────────┤
+    Röle NO ───────────►│ VCC (12V/2A)         │
+    Ortak GND ─────────►│ GND                  │
+                        │                      │
+    AD9833 SMA ────────►│ RFIN (50Ω)           │
+                        │ [SMA Dişi Konnektör] │
+                        │                      │
+                        │ RFOUT (50Ω) ─────────┼──┐
+                        │ [SMA Dişi Konnektör] │  │
+                        │ (~0.5-1W çıkış)      │  │
+                        └──────────────────────┘  │
+                                                  │
+                                      RF Out (~1W, 50Ω)
+                                                  │
+                                                  ▼
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   5V RÖLE MODÜLÜ (RF Amp Kontrol)                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────────────────────┐
+                    │   5V RÖLE MODÜL (Üstten Görünüş) │
+                    ├──────────────────────────────────┤
+                    │  VCC  GND  IN   NC  COM  NO     │  ← Pinler
+                    └──────────────────────────────────┘
+
+         Pin Açıklamaları:
+         • VCC: Arduino 5V        → Röle güç kaynağı
+         • GND: Arduino GND       → Ortak toprak
+         • IN:  Arduino Pin 10    → Kontrol sinyali (aktif LOW)
+         • NC:  Normally Closed   → Kullanılmıyor
+         • COM: Common            → 12V PSU pozitif
+         • NO:  Normally Open     → RF Amp VCC
+
+                        ┌──────────────────────┐
+                        │   5V RÖLE MODÜLÜ     │
+                        │   (1 Kanal)          │
+                        ├──────────────────────┤
+    Arduino 5V ────────►│ VCC                  │
+    Arduino GND ───────►│ GND                  │
+                        │                      │
+    Arduino Pin 10 ────►│ IN (Kontrol)         │
+                        │                      │
+    12V PSU (+) ───────►│ COM (Ortak)          │
+                        │                      │
+                        │ NO (N.Open) ─────────┼──► RF Amp VCC
+                        │                      │
+                        │ NC (N.Closed) [Boş]  │
+                        └──────────────────────┘
+
+         ÇALIŞMA PRENSİBİ:
+         ┌─────────────────┬──────────────┬─────────────┐
+         │ Pin 10 Durumu   │ Röle Durumu  │ RF Amp      │
+         ├─────────────────┼──────────────┼─────────────┤
+         │ HIGH (5V)       │ KAPALI       │ GÜÇ YOK ❌  │
+         │ LOW (0V)        │ AÇIK         │ ÇALIŞIR ✓   │
+         └─────────────────┴──────────────┴─────────────┘
+
+         NOT: Çoğu röle modülü AKTIF LOW çalışır!
+              Kodda digitalWrite(RF_AMP_ENABLE, LOW) → Amp AÇIK
+              digitalWrite(RF_AMP_ENABLE, HIGH) → Amp KAPALI
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                  20dB ATTENUATOR (Güvenlik için)                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                            ┌──────────┐
+    RF Amp OUT (1W) ───────►│   -20dB  │
+                            │  Atten.  │
+                            │  (50Ω)   │
+                            └────┬─────┘
+                                 │
+                      ~10mW (Güvenli seviye)
+                                 │
+                                 ▼
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SWR BRIDGE - T50-2 Toroid                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌──────────────────────┐
+                        │    SWR BRIDGE        │
+                        │    T50-2 Toroid      │
+                        │                      │
+    Attenuator ────────►│ INPUT (50Ω)          │
+                        │                      │
+                        │  ┌────────────┐      │
+                        │  │  T50-2     │      │
+                        │  │  10T Pri   │      │
+                        │  │  2T FWD ───┼──────┼─┐  FWD Sample
+                        │  │  2T REF ───┼──────┼─┼─┐  REF Sample
+                        │  └────────────┘      │ │ │
+                        │                      │ │ │
+                        │ OUTPUT (50Ω) ────────┼─┼─┼──► ANTEN
+                        └──────────────────────┘ │ │
+                                                 │ │
+                                    FWD Sample ──┘ │
+                                    REF Sample ────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              RF DEDEKTÖRLER - AD8307 (x2 Adet)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────────────┐         ┌─────────────────────────┐
+    │   AD8307 #1 (FORWARD)   │         │  AD8307 #2 (REFLECTED)  │
+    │   Logarithmic Detector  │         │  Logarithmic Detector   │
+    ├─────────────────────────┤         ├─────────────────────────┤
+    │ VCC: 5V                 │         │ VCC: 5V                 │
+    │ GND: GND                │         │ GND: GND                │
+    │                         │         │                         │
+FWD►│ IN: FWD Sample          │     REF►│ IN: REF Sample          │
+    │                         │         │                         │
+    │ OUT: DC Voltage ────────┼──┐      │ OUT: DC Voltage ────────┼──┐
+    │      (0-2.5V)           │  │      │      (0-2.5V)           │  │
+    └─────────────────────────┘  │      └─────────────────────────┘  │
+                                 │                                   │
+                            A0 ──┘                              A1 ──┘
+                       (Arduino Mega)                     (Arduino Mega)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   STEP MOTOR DRIVER - TB6600                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌──────────────────────┐
+                        │      TB6600          │
+                        │   Step Driver        │
+                        ├──────────────────────┤
+    Pin 4 ─────────────►│ PUL- (Step)          │
+    Pin 3 ─────────────►│ DIR- (Direction)     │
+    Pin 9 ─────────────►│ ENA- (Enable)        │
+                        │                      │
+    5V ────────────────►│ PUL+ (5V)            │
+    5V ────────────────►│ DIR+ (5V)            │
+    5V ────────────────►│ ENA+ (5V)            │
+                        │                      │
+    12-24V ────────────►│ VCC (Motor Power)    │
+    GND ────────────────┤ GND                  │
+                        │                      │
+                        │ A+, A- ──────────────┼──┐
+                        │ B+, B- ──────────────┼──┼──► STEP MOTOR
+                        └──────────────────────┘  │
+                                                  │
+                                                  ▼
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      STEP MOTOR - NEMA 17                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌──────────────────────┐
+                        │    STEP MOTOR        │
+                        │    NEMA 17           │
+    TB6600 A+ ─────────►│ Coil A+              │
+    TB6600 A- ─────────►│ Coil A-              │
+    TB6600 B+ ─────────►│ Coil B+              │
+    TB6600 B- ─────────►│ Coil B-              │
+                        │                      │
+                        │ Motor Şaft ──────────┼──► Vakum Kapasitör
+                        └──────────────────────┘      (Mekanik)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   KULLANICI ARAYÜZLERİ                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    ┌──────────────────┐              ┌─────────────────┐
+    │  ROTARY ENCODER  │              │  PUSH BUTONLAR  │
+    ├──────────────────┤              ├─────────────────┤
+    │ CLK ─────► Pin 2 │              │ BTN_FWD ─► Pin 7│
+    │ DT  ─────► Pin 5 │              │ BTN_REV ─► Pin 8│
+    │ SW  ─────► Pin 6 │              │ GND ────────GND │
+    │ GND ─────── GND  │              └─────────────────┘
+    │ +5V ─────── 5V   │
+    └──────────────────┘
+
+    ┌──────────────────┐
+    │   PC / LAPTOP    │
+    │                  │
+    │  Serial Monitor  │
+    │  (115200 baud)   │
+    └────────┬─────────┘
+             │
+         USB Kablo
+             │
+             ▼
+    Arduino Mega USB Port
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     ÇIKIŞ - LOOP ANTEN                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                        ┌──────────────────────┐
+                        │   LOOP ANTEN         │
+                        │   (Manyetik Loop)    │
+    SWR Bridge OUT ────►│ Besleme Noktası      │
+                        │                      │
+    Motor Şaft ────────►│ Vakum Kapasitör      │
+                        │ (Ayar Mekanizması)   │
+                        └──────────────────────┘
+
+
+┌═════════════════════════════════════════════════════════════════════════════┐
+║                         DETAYLI KABLO BAĞLANTILARI                           ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+
+══════════════════════════════════════════════════════════════════════════════
+  GÜÇ DAĞITIMI (POWER DISTRIBUTION)
+══════════════════════════════════════════════════════════════════════════════
+
+[12V/2A PSU] ──┬─── 12V ───► [RF Amplifier VCC]
+               │
+               └─── GND ──┐
+                          │
+[5V/2A PSU]  ──┬─── 5V ───┼──► [Arduino Mega VIN]
+               │          │
+               │          ├──► [AD9833 VCC] (3.3V modülse Arduino 3.3V)
+               │          │
+               │          ├──► [AD8307 #1 VCC]
+               │          │
+               │          ├──► [AD8307 #2 VCC]
+               │          │
+               │          ├──► [TB6600 PUL+/DIR+/ENA+]
+               │          │
+               │          ├──► [Encoder VCC]
+               │          │
+               └─── GND ──┼──► [ORTAK GND BUS]
+                          │
+[Motor PSU 24V]───── GND ─┤
+                          │
+                      ════╧════ (Common Ground)
+
+
+══════════════════════════════════════════════════════════════════════════════
+  SPI İLETİŞİM (Arduino ↔ AD9833)
+══════════════════════════════════════════════════════════════════════════════
+
+Arduino Pin 51 (MOSI) ────[Kablo]───► AD9833 DAT (SDATA)
+Arduino Pin 52 (SCK)  ────[Kablo]───► AD9833 CLK (SCLK)
+Arduino Pin 53 (SS)   ────[Kablo]───► AD9833 FSY (FSYNC)
+Arduino 5V            ────[Kablo]───► AD9833 VCC
+Arduino GND           ────[Kablo]───► AD9833 GND (4 pinden herhangi biri)
+
+KULLANILMAYAN PİNLER:
+    • CS:  Boş bırakılır (alternatif chip select)
+    • PGA: Boş bırakılır (programlanabilir kazanç - harici ayar)
+
+
+══════════════════════════════════════════════════════════════════════════════
+  ANALOG ÖLÇÜM (Arduino ↔ AD8307)
+══════════════════════════════════════════════════════════════════════════════
+
+AD8307 #1 OUT (DC 0-2.5V) ────[Kablo]───► Arduino A0 (FWD Power)
+AD8307 #2 OUT (DC 0-2.5V) ────[Kablo]───► Arduino A1 (REF Power)
+
+
+══════════════════════════════════════════════════════════════════════════════
+  MOTOR KONTROL (Arduino ↔ TB6600)
+══════════════════════════════════════════════════════════════════════════════
+
+Arduino Pin 4 ────[Kablo]───► TB6600 PUL- (Step Pulses)
+Arduino Pin 3 ────[Kablo]───► TB6600 DIR- (Direction)
+Arduino Pin 9 ────[Kablo]───► TB6600 ENA- (Enable/Disable)
+
+Arduino 5V ───┬──[Kablo]───► TB6600 PUL+ (Pull-up)
+              ├──[Kablo]───► TB6600 DIR+ (Pull-up)
+              └──[Kablo]───► TB6600 ENA+ (Pull-up)
+
+
+══════════════════════════════════════════════════════════════════════════════
+  RF ZİNCİRİ (Signal Path)
+══════════════════════════════════════════════════════════════════════════════
+
+AD9833 SMA Dişi Konnektör (600mV p-p sinüs, 50Ω)
+    │
+    │ [Direkt bağlantı - Balun/Transformer gerekmez!]
+    │
+    │ [SMA Erkek-Erkek Koaksiyel Kablo - RG174]
+    │ (veya SMA Erkek → RF Amp IN)
+    ▼
+RF Amplifier IN (SMA Dişi)
+
+ALTERNATİF: VOUT Pin Kullanımı
+    AD9833 VOUT (pin header)
+        │
+        │ [Jumper kablo veya ince tel]
+        │ [BNC adaptör eklenebilir]
+        ▼
+    RF Amplifier IN
+
+ÖNERİ: SMA konnektörü kullan (daha iyi kalkan ve empedans)
+    │
+    │ [Amplification +20dB]
+    │
+RF Amplifier OUT (~1W, 50Ω)
+    │
+    │ [50Ω Koaksiyel Kablo]
+    │
+    ▼
+20dB Attenuator IN
+    │
+    │ [Attenuation -20dB]
+    │
+20dB Attenuator OUT (~10mW)
+    │
+    │ [50Ω Koaksiyel Kablo]
+    │
+    ▼
+SWR Bridge INPUT
+    │
+    ├─── FWD Sample ──► AD8307 #1 IN
+    │
+    ├─── REF Sample ──► AD8307 #2 IN
+    │
+SWR Bridge OUTPUT
+    │
+    │ [50Ω Koaksiyel Kablo]
+    │
+    ▼
+LOOP ANTEN (Manyetik Loop)
+
+
+══════════════════════════════════════════════════════════════════════════════
+  KULLANICI GİRİŞLERİ
+══════════════════════════════════════════════════════════════════════════════
+
+[Rotary Encoder]
+    CLK ────[Kablo]───► Arduino Pin 2 (Interrupt)
+    DT  ────[Kablo]───► Arduino Pin 5
+    SW  ────[Kablo]───► Arduino Pin 6 (Pullup dahili)
+    VCC ────[Kablo]───► Arduino 5V
+    GND ────[Kablo]───► Arduino GND
+
+[Push Buton İleri]
+    Pin 1 ──[Kablo]───► Arduino Pin 7 (Pullup dahili)
+    Pin 2 ──[Kablo]───► Arduino GND
+
+[Push Buton Geri]
+    Pin 1 ──[Kablo]───► Arduino Pin 8 (Pullup dahili)
+    Pin 2 ──[Kablo]───► Arduino GND
+
+
+══════════════════════════════════════════════════════════════════════════════
+  RF AMPLIFIER KONTROL (RÖLE MODÜLÜ)
+══════════════════════════════════════════════════════════════════════════════
+
+Röle Modül Bağlantıları:
+    Arduino 5V  ────[Kablo]───► Röle VCC
+    Arduino GND ────[Kablo]───► Röle GND
+    Arduino Pin 10 ──[Kablo]───► Röle IN (Kontrol)
+    
+    12V PSU (+) ────[Kablo]───► Röle COM (Ortak)
+    Röle NO (N.Open) ─[Kablo]───► RF Amp VCC
+    Röle NC ───────────────── [Boş bırakılır]
+
+KONTROL MANTİĞI (AKTİF LOW):
+    ┌─────────────────┬──────────────┬─────────────┐
+    │ Pin 10 Durumu   │ Röle Durumu  │ RF Amp      │
+    ├─────────────────┼──────────────┼─────────────┤
+    │ HIGH (5V)       │ KAPALI       │ GÜÇ YOK ❌  │
+    │ LOW (0V)        │ AÇIK         │ ÇALIŞIR ✓   │
+    └─────────────────┴──────────────┴─────────────┘
+
+KODDA KULLANIM:
+    digitalWrite(RF_AMP_ENABLE, LOW);   // RF Amp AÇIK
+    digitalWrite(RF_AMP_ENABLE, HIGH);  // RF Amp KAPALI
+
+ÖNEMLİ NOT:
+    • Çoğu 5V röle modülü AKTİF LOW çalışır!
+    • Röle modülü üzerinde LED olur (kontrol için)
+    • Röle ile 12V/2A güç güvenle açılır/kapatılır
+    • Mekanik röle "tik" sesi yapar
+
+
+══════════════════════════════════════════════════════════════════════════════
+  MEKANIK BAĞLANTI
+══════════════════════════════════════════════════════════════════════════════
+
+Step Motor Şaft
+    │
+    │ [Flexible Coupling veya Kayış]
+    │
+    ▼
+Vakum Kapasitör Şaftı (Loop Anten Tune)
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                          KABLO UZUNLUKLARI                                   ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+RF Kabloları (50Ω Koaksiyel):
+    • AD9833 SMA → RF Amp:    15cm (SMA Erkek-Erkek, RG174)
+    • RF Amp → Attenuator:    15cm (RG174)
+    • Alternatif: VOUT → RF Amp: 10cm (jumper kablo - önerilmez)
+    • Attenuator → SWR Bridge: 15cm (RG174)
+    • SWR Bridge → Anten:     50cm-1m (RG58 veya RG213)
+
+Güç Kabloları:
+    • 12V PSU → RF Amp:       30cm (18AWG, kırmızı/siyah)
+    • 5V PSU → Arduino:       20cm (USB veya Jack)
+    • Arduino 5V dağıtım:     20cm her modül için
+
+Sinyal Kabloları:
+    • Arduino → AD9833:       15cm (Dupont jumper 3 adet: DAT,CLK,FSY)
+    • Arduino → AD8307:       20cm (Dupont jumper 2 adet)
+    • Arduino → Röle Modül:   15cm (Dupont jumper 3 adet: VCC,GND,IN)
+    • GND ve VCC:             15cm (Dupont jumper, AD9833 güç)
+    • Arduino → TB6600:       25cm (Dupont jumper 3 adet)
+    • Arduino → Encoder:      20cm (Dupont jumper 5 adet)
+    • Arduino → Butonlar:     30cm (2 telli kablo, 2 adet)
+
+RF Sample Kabloları:
+    • SWR Bridge → AD8307:    10cm (RG174 veya ince koax)
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                         KONNEKTÖR TİPLERİ                                    ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+RF Bağlantıları:
+    • SMA (önerilen) - Kompakt, 18GHz'e kadar
+    • BNC (alternatif) - Kolay takma/çıkarma
+    • SO239/PL259 - Anten bağlantısı için
+
+Güç Bağlantıları:
+    • DC Jack (2.1mm) - PSU'lar için
+    • XT60 veya Screw Terminal - Motor gücü için
+    • USB Type-B - Arduino programlama
+
+Sinyal Bağlantıları:
+    • 2.54mm Pin Header - Arduino pinleri
+    • Dupont Jumper Kablolar - Kolay test
+    • JST-XH Konnektörler - Kalıcı montaj için
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                      AD9833 ÇIKIŞ BAĞLANTISI                                 ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+AD9833 modülünde 2 farklı RF çıkışı var:
+
+SEÇENEK 1: SMA DİŞİ KONNEKTÖR (Önerilen ✓)
+    ┌────────────┐
+    │  AD9833    │     [SMA Erkek-Erkek]
+    │            │     [Koaksiyel Kablo]
+    │ [SMA Dişi] ┼═══════════════════► RF Amp IN
+    │            │     (RG174, 15cm)
+    │ GND ───────┼──► GND
+    │            │
+    └────────────┘
+    
+    ✓ En iyi yöntem!
+    ✓ 50Ω empedans koruması
+    ✓ RF kalkanlaması mükemmel
+    ✓ Tak-çalıştır
+
+SEÇENEK 2: VOUT PİNİ (Alternatif)
+    ┌────────────┐
+    │  AD9833    │
+    │            │     [Jumper kablo]
+    │ VOUT ──────┼────────────► RF Amp IN
+    │            │     (ince tel 10-15cm)
+    │ GND ───────┼──► GND
+    │            │
+    └────────────┘
+    
+    • Test için kullanılabilir
+    • Empedans uyumsuzluğu olabilir
+    • Uzun mesafelerde sinyal kaybı
+    • RF parazit alabilir
+
+Her iki çıkış da aynı sinyali verir:
+    • 600mV p-p (~30mW güç)
+    • Direkt 50Ω çıkış
+    • HF bandı için ideal
+    • Balun/transformer gerekmez!
+
+OPSİYONEL: RC Filtre (Harmonik Azaltma)
+    ┌────────────┐
+    │  AD9833    │         100Ω     100pF
+    │            │          ┌─┐      ┌─┐
+    │ VOUT ──────┼─────────┤ ├──┬───┤ ├─── RF Amp IN
+    │            │          └─┘  │   └─┘
+    │ GND ───────┼──────────┬────┴───GND
+    │            │          │
+    └────────────┘         GND
+    
+    • 3. harmonik bastırma
+    • Daha temiz sinüs
+    • Çoğu uygulamada gereksiz
+    • VOUT pininden çıkış alınırsa kullanılabilir
+
+AD9833 vs AD9850 KARŞILAŞTIRMA:
+    ┌────────────────┬──────────────┬──────────────┐
+    │  Özellik       │   AD9833     │   AD9850     │
+    ├────────────────┼──────────────┼──────────────┤
+    │ Frekans Max    │  12.5 MHz    │  40 MHz      │
+    │ Çıkış Tipi     │  Single-end  │  Diferansiyel│
+    │ Çıkış Gücü     │  600mV p-p   │  200mW p-p   │
+    │ Balun Gerekli? │  HAYIR ✓     │  Evet/Tercih │
+    │ Güç Tüketimi   │  15mA        │  380mA       │
+    │ Pin Sayısı     │  3 (SPI)     │  4 (Parallel)│
+    │ Bağlantı       │  Çok Kolay ✓ │  Karmaşık    │
+    │ HF için        │  İdeal ✓     │  İyi         │
+    └────────────────┴──────────────┴──────────────┘
+
+ÖNERİ: AD9833 kullan - Direkt bağlantı, daha az karmaşık, HF için yeterli!
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                    MONTAJ SIRASINDAKİ BAĞLANTI DÜZENİ                        ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+ADIM 1: Güç Dağıtımı
+    ✓ Ground bus oluştur (bakır şerit veya kalın tel)
+    ✓ 12V PSU → RF Amp bağla
+    ✓ 5V PSU → Arduino bağla
+    ✓ Tüm GND'leri ortak bus'a bağla
+    ✓ TEST: Multimetre ile voltajları kontrol et
+
+ADIM 2: DDS Bağlantısı
+    ✓ AD9833 VCC → Arduino 5V
+    ✓ AD9833 GND → Arduino GND (4 pinden herhangi biri)
+    ✓ AD9833 FSY → Arduino Pin 53
+    ✓ AD9833 CLK → Arduino Pin 52
+    ✓ AD9833 DAT → Arduino Pin 51
+    ✓ CS ve PGA pinlerini boş bırak
+    ✓ TEST: Kodu yükle, frekans ayarla
+
+ADIM 3: RF Zinciri + Röle Modülü
+    ✓ Röle VCC → Arduino 5V
+    ✓ Röle GND → Arduino GND
+    ✓ Röle IN  → Arduino Pin 10
+    ✓ 12V PSU → Röle COM
+    ✓ Röle NO  → RF Amp VCC
+    ✓ RF Amp GND → Ortak GND
+    ✓ AD9833 SMA Dişi → SMA Erkek-Erkek kablo → RF Amp RFIN
+    ✓ (Alternatif: VOUT pin → jumper kablo → RF Amp RFIN)
+    ✓ RF Amp RFOUT → Attenuator (koax)
+    ✓ Attenuator → SWR Bridge (koax)
+    ✓ TEST: Serial'den R komutu → Röle tik sesi duyulmalı
+
+ADIM 4: SWR Bridge Montajı
+    ✓ T50-2 toroid sarımı yap (ASSEMBLY.md'ye göre)
+    ✓ FWD sample → AD8307 #1
+    ✓ REF sample → AD8307 #2
+    ✓ AD8307 OUT'ları → A0, A1
+    ✓ TEST: Dummy load ile SWR ölç
+
+ADIM 5: Motor Sistemi
+    ✓ TB6600 güç bağlantıları (24V motor PSU)
+    ✓ Pin 4,3,9 → TB6600
+    ✓ TB6600 → Step Motor (4 tel)
+    ✓ Motor → Kapasitör mekanik bağlantı
+    ✓ TEST: Manuel motor hareketi
+
+ADIM 6: Kullanıcı Arayüzü
+    ✓ Encoder bağla (CLK, DT, SW)
+    ✓ Butonları bağla (Pin 7, 8)
+    ✓ TEST: Serial Monitor'den komutlar
+
+ADIM 7: Final Test
+    ✓ Tüm voltajları ölç
+    ✓ RF zincirini kontrol et
+    ✓ Otomatik tune testi (T7.100)
+    ✓ SWR değerlerini gözlemle
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                         EMI/RF KORUMA ÖNLEMLERİ                              ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+1. RF Kabloların Kalkanlanması:
+    • Tüm RF kablolar koaksiyel olmalı (shield'li)
+    • Shield'ler her iki uçta da GND'ye bağlanmalı
+    • Kablo uzunlukları minimum tutulmalı
+
+2. Ground Plane:
+    • Metal şase veya bakır ground plane kullan
+    • Tüm modüllerin GND'leri tek noktadan bağlansın (star topology)
+    • RF ground ile dijital ground ortak olsun
+
+3. Güç Filtreleme:
+    • Her modülün VCC girişine 100nF seramik kondansatör
+    • RF Amp gücüne 100uF elektrolitik + 100nF seramik
+    • AD9850'ye 10uF + 100nF + 10nF (3'lü)
+
+4. Fiziksel Yerleşim:
+    • RF modüller bir tarafta (AD9850, Amp, SWR Bridge)
+    • Dijital modüller diğer tarafta (Arduino, TB6600)
+    • AD8307'ler RF kaynağından uzak
+    • Motor sürücüsü Arduino'dan uzak
+
+5. Kablo Düzeni:
+    • RF kabloları ve dijital kabloları çaprazlamayın
+    • Motor kabloları twist edilmeli (EMI azaltma)
+    • Uzun paralel kablolardan kaçının
+
+6. Metal Kutu:
+    • Tüm sistem metal kutuda olmalı
+    • Kutu GND'ye bağlanmalı
+    • RF çıkışı için SO239 panel mount
+    • Havalandırma delikleri (RF Amp için)
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                              ÖNEMLİ NOTLAR                                   ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+⚠️  GÜVENLİK:
+    • İlk açılışta RF Amp gücünü KAPALI tut
+    • Röle kullanıyorsan yazılımdan kontrol et
+    • Test sırasında dummy load kullan
+    • RF Amp'e soğutma sağla (heatsink veya fan)
+    • Motor hareket ederken elleri uzak tut
+
+⚠️  ELEKTRİK:
+    • Polariteye dikkat (12V ters bağlama!)
+    • Ortak GND şart (ground loop problemi)
+    • Güç kaynakları yeterli akım sağlamalı
+
+⚠️  RF:
+    • AD9833 frekans aralığı: 0-12.5 MHz (HF için ideal)
+    • 50Ω empedans uyumu kritik
+    • SMA konnektörler sıkıca takılmalı
+    • Uzun RF kablolarında kayıp artar
+    • SWR >3:1 ise sistemi durdur
+
+⚠️  YAZILIM:
+    • İlk kullanımda kalibrasyonu yap
+    • SWR eşik değerlerini ayarla
+    • Motor limitlerini belirle (step counter)
+    • Seri monitörden logları takip et
+
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                         SİSTEM TEST PROSEDÜRÜ                                ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+1. GÜÇ TESTİ:
+   □ 5V tüm modüllerde var mı?
+   □ 12V RF Amp'te var mı?
+   □ GND ortak mu?
+
+2. DDS TESTİ:
+   □ Serial'den F7.100 komutunu gönder
+   □ Osiloskop probu:
+      • SMA çıkışına (BNC→SMA adaptör ile), VEYA
+      • VOUT pinine (direkt prob)
+   □ Beklenen: 7.100 MHz sinüs, 600mV p-p
+   □ Frekans counter ile doğrula
+
+3. RF AMP + RÖLE TESTİ:
+   □ Röle bağlantılarını kontrol et
+   □ Serial'den R komutu gönder
+   □ Röle "tik" sesi duyulmalı (mekanik röle)
+   □ Röle LED'i yanmalı (varsa)
+   □ RF Amp'e 12V güç gelmeli (multimetre ile ölç)
+   □ RF probe ile RFOUT'u ölç (~1W çıkış beklenir)
+   □ Attenuator sonrası ~10mW olmalı
+
+4. SWR TESTİ:
+   □ Dummy load tak
+   □ Serial'den M (SWR ölç)
+   □ SWR ~1.0-1.2 olmalı (ideal match)
+
+5. MOTOR TESTİ:
+   □ Buton 7'ye bas → Motor ileri dönmeli
+   □ Buton 8'e bas → Motor geri dönmeli
+   □ Encoder çevir → Step sayısı değişmeli
+
+6. OTOMATİK TUNE TESTİ:
+   □ Gerçek anten bağla
+   □ Serial'den T7.100
+   □ Motor otomatik dönmeli
+   □ SWR minimize olmalı (<1.5)
+
+7. BAND SWEEP TESTİ:
+   □ Serial'den SWEEP 7.0 7.3
+   □ Tüm frekanslarda SWR ölçülmeli
+   □ En düşük SWR frekansı bulunmalı
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                          SİSTEM HAZIR! 🎉
+═══════════════════════════════════════════════════════════════════════════════
+```
