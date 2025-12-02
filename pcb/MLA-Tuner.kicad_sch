@@ -1,0 +1,466 @@
+(kicad_sch
+  (version 20231120)
+  (generator "eeschema")
+  (generator_version "8.0")
+  (uuid "e63e39d7-6ac0-4ffd-8aa3-1841a4541b55")
+  (paper "A3")
+  (title_block
+    (title "Manyetik Loop Auto-Tuner")
+    (date "2024-01-15")
+    (rev "4.0")
+    (comment 1 "AD9833 DDS Based System")
+    (comment 2 "Automatic MLA Tuner Project")
+  )
+
+  ;; ========== SYMBOL LIBRARY REFERENCES ==========
+  
+  ;; ========== POWER SYMBOLS ==========
+  
+  ;; GND Symbol
+  (symbol (lib_id "power:GND") (at 50 200 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000001-0000-0000-0000-000000000001")
+    (property "Reference" "#PWR01" (at 50 206 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "GND" (at 50 204 0)
+      (effects (font (size 1.27 1.27))))
+  )
+  
+  ;; +5V Symbol
+  (symbol (lib_id "power:+5V") (at 50 50 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000001-0000-0000-0000-000000000002")
+    (property "Reference" "#PWR02" (at 50 54 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "+5V" (at 50 46 0)
+      (effects (font (size 1.27 1.27))))
+  )
+  
+  ;; +12V Symbol
+  (symbol (lib_id "power:+12V") (at 200 50 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000001-0000-0000-0000-000000000003")
+    (property "Reference" "#PWR03" (at 200 54 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Value" "+12V" (at 200 46 0)
+      (effects (font (size 1.27 1.27))))
+  )
+
+  ;; ========== ARDUINO MEGA 2560 ==========
+  
+  (symbol (lib_id "MCU_Module:Arduino_Mega2560") (at 100 120 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000002-0000-0000-0000-000000000001")
+    (property "Reference" "U1" (at 100 70 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "Arduino_Mega2560" (at 100 72 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:Arduino_Mega2560" (at 100 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Arduino Mega 2560 Controller - Main MCU" (at 100 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Pin Definitions - Key pins for MLA Tuner
+    ;; Pin 2 (INT0) - Encoder CLK
+    ;; Pin 3 - DIR- (TB6600)
+    ;; Pin 4 - STEP/PUL- (TB6600)
+    ;; Pin 5 - Encoder DT
+    ;; Pin 6 - Encoder SW
+    ;; Pin 7 - Button Forward
+    ;; Pin 8 - Button Reverse
+    ;; Pin 9 - ENA- (TB6600)
+    ;; Pin 10 - RF_AMP_ENABLE (Relay)
+    ;; Pin 51 (MOSI) - DDS SDATA
+    ;; Pin 52 (SCK) - DDS SCLK
+    ;; Pin 53 (SS) - DDS FSYNC
+    ;; A0 - SWR Forward (AD8307 #1)
+    ;; A1 - SWR Reflected (AD8307 #2)
+  )
+
+  ;; ========== AD9833 DDS MODULE ==========
+  
+  (symbol (lib_id "Analog_DAC:AD9833") (at 220 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000003-0000-0000-0000-000000000001")
+    (property "Reference" "U2" (at 220 85 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "AD9833_Module" (at 220 87 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:AD9833_Module" (at 220 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "DDS Signal Generator 0-12.5MHz, Direct Sine Output" (at 220 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; VCC - 5V (or 3.3V check module)
+    ;; GND - Ground (4 pins available)
+    ;; DAT/SDATA - Arduino Pin 51 (MOSI)
+    ;; CLK/SCLK - Arduino Pin 52 (SCK)
+    ;; FSY/FSYNC - Arduino Pin 53 (SS)
+    ;; SMA OUT - RF Amplifier IN (50Ω)
+    ;; VOUT - Alternative output (pin header)
+  )
+
+  ;; ========== RF AMPLIFIER MODULE (1MHz-3GHz) ==========
+  
+  (symbol (lib_id "Amplifier_Operational:RF_Amplifier") (at 280 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000004-0000-0000-0000-000000000001")
+    (property "Reference" "U3" (at 280 85 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "RF_AMP_1MHz-3GHz" (at 280 87 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:RF_Amplifier_Module" (at 280 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Wideband RF Amplifier +20dB Gain, 1MHz-3GHz" (at 280 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; VCC - 12V via Relay NO (2A required)
+    ;; GND - Common Ground
+    ;; RFIN - AD9833 SMA OUT (50Ω)
+    ;; RFOUT - 20dB Attenuator → SWR Bridge
+  )
+
+  ;; ========== 5V RELAY MODULE (RF Amp Control) ==========
+  
+  (symbol (lib_id "Relay:Relay_SPDT") (at 250 140 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000005-0000-0000-0000-000000000001")
+    (property "Reference" "K1" (at 250 125 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "5V_Relay_Module" (at 250 127 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:Relay_Module_1CH" (at 250 140 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "5V Relay Module for RF Amp Power Control, Active LOW" (at 250 140 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; VCC - Arduino 5V
+    ;; GND - Arduino GND
+    ;; IN - Arduino Pin 10 (Active LOW)
+    ;; COM - 12V PSU (+)
+    ;; NO - RF Amplifier VCC
+    ;; NC - Not used
+  )
+
+  ;; ========== TB6600 STEP MOTOR DRIVER ==========
+  
+  (symbol (lib_id "Driver_Motor:TB6600") (at 100 180 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000006-0000-0000-0000-000000000001")
+    (property "Reference" "U4" (at 100 165 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "TB6600_Driver" (at 100 167 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:TB6600_Driver" (at 100 180 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Stepper Motor Driver, Micro-stepping" (at 100 180 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; PUL- - Arduino Pin 4
+    ;; DIR- - Arduino Pin 3
+    ;; ENA- - Arduino Pin 9
+    ;; PUL+/DIR+/ENA+ - 5V (Pull-up)
+    ;; VCC - 12-24V (Motor Power)
+    ;; GND - Ground
+    ;; A+/A-/B+/B- - Step Motor Coils
+  )
+
+  ;; ========== NEMA 17 STEP MOTOR ==========
+  
+  (symbol (lib_id "Motor:Motor_Stepper") (at 100 220 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000007-0000-0000-0000-000000000001")
+    (property "Reference" "M1" (at 100 205 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "NEMA17_Stepper" (at 100 207 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Motor:NEMA17" (at 100 220 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "NEMA 17 Stepper Motor for Vacuum Capacitor Tuning" (at 100 220 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; Coil A+ - TB6600 A+
+    ;; Coil A- - TB6600 A-
+    ;; Coil B+ - TB6600 B+
+    ;; Coil B- - TB6600 B-
+    ;; Shaft - Vacuum Capacitor (Mechanical)
+  )
+
+  ;; ========== AD8307 #1 (FORWARD POWER) ==========
+  
+  (symbol (lib_id "Analog:AD8307") (at 320 120 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000008-0000-0000-0000-000000000001")
+    (property "Reference" "U5" (at 320 105 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "AD8307_FWD" (at 320 107 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:AD8307_Module" (at 320 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Logarithmic RF Detector for Forward Power, 0-2.5V DC Output" (at 320 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; VCC - 5V
+    ;; GND - Ground
+    ;; RFIN - SWR Bridge FWD Sample
+    ;; VOUT - Arduino A0
+  )
+
+  ;; ========== AD8307 #2 (REFLECTED POWER) ==========
+  
+  (symbol (lib_id "Analog:AD8307") (at 320 160 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000009-0000-0000-0000-000000000001")
+    (property "Reference" "U6" (at 320 145 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "AD8307_REF" (at 320 147 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Module:AD8307_Module" (at 320 160 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Logarithmic RF Detector for Reflected Power, 0-2.5V DC Output" (at 320 160 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; VCC - 5V
+    ;; GND - Ground
+    ;; RFIN - SWR Bridge REF Sample
+    ;; VOUT - Arduino A1
+  )
+
+  ;; ========== SWR BRIDGE (T50-2 TOROID) ==========
+  
+  (symbol (lib_id "RF:SWR_Bridge") (at 300 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000010-0000-0000-0000-000000000001")
+    (property "Reference" "BR1" (at 300 85 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "SWR_Bridge_T50-2" (at 300 87 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Custom:SWR_Bridge" (at 300 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "SWR Bridge with T50-2 Toroid, 10T Primary, 2T FWD/REF" (at 300 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; INPUT - From 20dB Attenuator (50Ω)
+    ;; OUTPUT - To Loop Antenna (50Ω)
+    ;; FWD Sample - AD8307 #1 IN
+    ;; REF Sample - AD8307 #2 IN
+  )
+
+  ;; ========== 20dB ATTENUATOR ==========
+  
+  (symbol (lib_id "RF:Attenuator") (at 290 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000011-0000-0000-0000-000000000001")
+    (property "Reference" "ATT1" (at 290 85 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "20dB_Attenuator" (at 290 87 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Custom:Attenuator_20dB" (at 290 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "20dB RF Attenuator for Power Safety, 50Ω" (at 290 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; IN - RF Amplifier OUT (~1W)
+    ;; OUT - SWR Bridge IN (~10mW)
+  )
+
+  ;; ========== ROTARY ENCODER ==========
+  
+  (symbol (lib_id "Device:Rotary_Encoder_Switch") (at 50 120 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000012-0000-0000-0000-000000000001")
+    (property "Reference" "SW1" (at 50 105 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "Rotary_Encoder" (at 50 107 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Rotary_Encoder:RotaryEncoder_Alps_EC11E-Switch_Vertical_H20mm" (at 50 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Rotary Encoder with Push Button for Profile Selection" (at 50 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; CLK - Arduino Pin 2 (Interrupt)
+    ;; DT - Arduino Pin 5
+    ;; SW - Arduino Pin 6 (Internal Pullup)
+    ;; VCC - 5V
+    ;; GND - Ground
+  )
+
+  ;; ========== PUSH BUTTONS ==========
+  
+  (symbol (lib_id "Switch:SW_Push") (at 50 150 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000013-0000-0000-0000-000000000001")
+    (property "Reference" "SW2" (at 50 140 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "BTN_FORWARD" (at 50 142 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Button_Switch_THT:SW_PUSH_6mm" (at 50 150 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Forward Direction Button, Connected to Pin 7" (at 50 150 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; Pin 1 - Arduino Pin 7 (Internal Pullup)
+    ;; Pin 2 - GND
+  )
+
+  (symbol (lib_id "Switch:SW_Push") (at 50 170 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000014-0000-0000-0000-000000000001")
+    (property "Reference" "SW3" (at 50 160 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "BTN_REVERSE" (at 50 162 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Button_Switch_THT:SW_PUSH_6mm" (at 50 170 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Reverse Direction Button, Connected to Pin 8" (at 50 170 0)
+      (effects (font (size 1.27 1.27)) hide))
+    ;; Connections:
+    ;; Pin 1 - Arduino Pin 8 (Internal Pullup)
+    ;; Pin 2 - GND
+  )
+
+  ;; ========== POWER CONNECTORS ==========
+  
+  (symbol (lib_id "Connector:Barrel_Jack") (at 30 60 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000015-0000-0000-0000-000000000001")
+    (property "Reference" "J1" (at 30 50 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "5V_DC_Jack" (at 30 52 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_BarrelJack:BarrelJack_Horizontal" (at 30 60 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "5V/2A DC Power Input for Arduino and Logic" (at 30 60 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Connector:Barrel_Jack") (at 180 60 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000016-0000-0000-0000-000000000001")
+    (property "Reference" "J2" (at 180 50 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "12V_DC_Jack" (at 180 52 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_BarrelJack:BarrelJack_Horizontal" (at 180 60 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "12V/2A DC Power Input for RF Amplifier" (at 180 60 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  ;; ========== SMA CONNECTORS ==========
+  
+  (symbol (lib_id "Connector:Conn_Coaxial") (at 340 100 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000017-0000-0000-0000-000000000001")
+    (property "Reference" "J3" (at 340 90 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "SMA_ANT_OUT" (at 340 92 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_Coaxial:SMA_Amphenol_132289_EdgeMount" (at 340 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "SMA Connector for Antenna Output, 50Ω" (at 340 100 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  ;; ========== DECOUPLING CAPACITORS ==========
+  
+  (symbol (lib_id "Device:C") (at 230 115 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000018-0000-0000-0000-000000000001")
+    (property "Reference" "C1" (at 232 112 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 232 118 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 230 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Decoupling Capacitor for AD9833" (at 230 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Device:C") (at 290 115 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000019-0000-0000-0000-000000000001")
+    (property "Reference" "C2" (at 292 112 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "100uF" (at 292 118 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm" (at 290 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Bulk Capacitor for RF Amplifier Power" (at 290 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Device:C") (at 295 115 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000020-0000-0000-0000-000000000001")
+    (property "Reference" "C3" (at 297 112 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 297 118 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 295 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Decoupling Capacitor for RF Amplifier" (at 295 115 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Device:C") (at 325 135 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000021-0000-0000-0000-000000000001")
+    (property "Reference" "C4" (at 327 132 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 327 138 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 325 135 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Decoupling Capacitor for AD8307 #1" (at 325 135 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Device:C") (at 325 175 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000022-0000-0000-0000-000000000001")
+    (property "Reference" "C5" (at 327 172 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "100nF" (at 327 178 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 325 175 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "Decoupling Capacitor for AD8307 #2" (at 325 175 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  ;; ========== PIN HEADERS FOR EXTERNAL CONNECTIONS ==========
+  
+  (symbol (lib_id "Connector:Conn_01x04_Pin") (at 120 220 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000023-0000-0000-0000-000000000001")
+    (property "Reference" "J4" (at 120 210 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "MOTOR_CONN" (at 120 212 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" (at 120 220 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "4-Pin Header for Stepper Motor Connection (A+, A-, B+, B-)" (at 120 220 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  (symbol (lib_id "Connector:Conn_01x05_Pin") (at 60 120 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no)
+    (uuid "00000024-0000-0000-0000-000000000001")
+    (property "Reference" "J5" (at 60 108 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Value" "ENCODER_CONN" (at 60 110 0)
+      (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" (at 60 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+    (property "Description" "5-Pin Header for Rotary Encoder (CLK, DT, SW, VCC, GND)" (at 60 120 0)
+      (effects (font (size 1.27 1.27)) hide))
+  )
+
+  ;; ========== NOTES AND LABELS ==========
+  
+  (text "MANYETIK LOOP AUTO-TUNER PCB v4.0\n================================\n\nBu PCB tasarımı aşağıdaki modülleri içerir:\n\n1. Arduino Mega 2560 - Ana kontrolör\n2. AD9833 DDS - Sinyal üretici (0-12.5 MHz)\n3. RF Amplifier - 1MHz-3GHz (+20dB)\n4. 5V Röle Modülü - RF Amp güç kontrolü\n5. TB6600 - Step motor sürücü\n6. AD8307 x2 - SWR ölçüm\n7. SWR Bridge - T50-2 Toroid\n8. 20dB Attenuator - Güç azaltma\n\nGüç Gereksinimleri:\n- 5V/2A - Arduino ve dijital devreler\n- 12V/2A - RF Amplifier\n- 24V (opsiyonel) - Step motor\n\nRF Zinciri:\nAD9833 → RF Amp → 20dB Atten → SWR Bridge → Anten"
+    (at 380 100 0)
+    (effects (font (size 2 2)) (justify left))
+  )
+
+)

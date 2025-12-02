@@ -1,0 +1,408 @@
+(kicad_pcb
+  (version 20231014)
+  (generator "pcbnew")
+  (generator_version "8.0")
+  (general
+    (thickness 1.6)
+    (legacy_teardrops no)
+  )
+  (paper "A3")
+  (title_block
+    (title "Manyetik Loop Auto-Tuner PCB")
+    (date "2024-01-15")
+    (rev "4.0")
+    (comment 1 "2 Layer PCB")
+    (comment 2 "Board Size: 150mm x 100mm")
+  )
+  (layers
+    (0 "F.Cu" signal)
+    (31 "B.Cu" signal)
+    (32 "B.Adhes" user "B.Adhesive")
+    (33 "F.Adhes" user "F.Adhesive")
+    (34 "B.Paste" user)
+    (35 "F.Paste" user)
+    (36 "B.SilkS" user "B.Silkscreen")
+    (37 "F.SilkS" user "F.Silkscreen")
+    (38 "B.Mask" user)
+    (39 "F.Mask" user)
+    (40 "Dwgs.User" user "User.Drawings")
+    (41 "Cmts.User" user "User.Comments")
+    (42 "Eco1.User" user "User.Eco1")
+    (43 "Eco2.User" user "User.Eco2")
+    (44 "Edge.Cuts" user)
+    (45 "Margin" user)
+    (46 "B.CrtYd" user "B.Courtyard")
+    (47 "F.CrtYd" user "F.Courtyard")
+    (48 "B.Fab" user)
+    (49 "F.Fab" user)
+  )
+  (setup
+    (pad_to_mask_clearance 0)
+    (allow_soldermask_bridges_in_footprints no)
+    (pcbplotparams
+      (layerselection 0x00010fc_ffffffff)
+      (plot_on_all_layers_selection 0x0000000_00000000)
+      (disableapertmacros no)
+      (usegerberextensions no)
+      (usegerberattributes yes)
+      (usegerberadvancedattributes yes)
+      (creategerberjobfile yes)
+      (dashed_line_dash_ratio 12.000000)
+      (dashed_line_gap_ratio 3.000000)
+      (svgprecision 4)
+      (plotframeref no)
+      (viasonmask no)
+      (mode 1)
+      (useauxorigin no)
+      (hpglpennumber 1)
+      (hpglpenspeed 20)
+      (hpglpendiameter 15.000000)
+      (pdf_front_fp_property_popups yes)
+      (pdf_back_fp_property_popups yes)
+      (dxfpolygonmode yes)
+      (dxfimperialunits yes)
+      (dxfusepcbnewfont yes)
+      (psnegative no)
+      (psa4output no)
+      (plotreference yes)
+      (plotvalue yes)
+      (plotfptext yes)
+      (plotinvisibletext no)
+      (sketchpadsonfab no)
+      (subtractmaskfromsilk no)
+      (outputformat 1)
+      (mirror no)
+      (drillshape 1)
+      (scaleselection 1)
+      (outputdirectory "")
+    )
+  )
+  (net 0 "")
+  (net 1 "GND")
+  (net 2 "+5V")
+  (net 3 "+12V")
+  (net 4 "DDS_SDATA")
+  (net 5 "DDS_SCLK")
+  (net 6 "DDS_FSYNC")
+  (net 7 "SWR_FWD")
+  (net 8 "SWR_REF")
+  (net 9 "MOTOR_PUL")
+  (net 10 "MOTOR_DIR")
+  (net 11 "MOTOR_ENA")
+  (net 12 "RF_AMP_EN")
+  (net 13 "ENC_CLK")
+  (net 14 "ENC_DT")
+  (net 15 "ENC_SW")
+  (net 16 "BTN_FWD")
+  (net 17 "BTN_REV")
+  (net 18 "RF_IN")
+  (net 19 "RF_OUT")
+  (net 20 "MOTOR_A+")
+  (net 21 "MOTOR_A-")
+  (net 22 "MOTOR_B+")
+  (net 23 "MOTOR_B-")
+
+  ;; Board Outline - 150mm x 100mm
+  (gr_rect
+    (start 0 0)
+    (end 150 100)
+    (stroke (width 0.15) (type default))
+    (fill none)
+    (layer "Edge.Cuts")
+    (uuid "00000000-0000-0000-0000-000000000001")
+  )
+
+  ;; Mounting Holes - M3 at corners
+  (footprint "MountingHole:MountingHole_3.2mm_M3"
+    (layer "F.Cu")
+    (uuid "10000001-0000-0000-0000-000000000001")
+    (at 5 5)
+    (property "Reference" "H1"
+      (at 0 -3 0)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+  )
+  (footprint "MountingHole:MountingHole_3.2mm_M3"
+    (layer "F.Cu")
+    (uuid "10000002-0000-0000-0000-000000000001")
+    (at 145 5)
+    (property "Reference" "H2"
+      (at 0 -3 0)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+  )
+  (footprint "MountingHole:MountingHole_3.2mm_M3"
+    (layer "F.Cu")
+    (uuid "10000003-0000-0000-0000-000000000001")
+    (at 5 95)
+    (property "Reference" "H3"
+      (at 0 3 0)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+  )
+  (footprint "MountingHole:MountingHole_3.2mm_M3"
+    (layer "F.Cu")
+    (uuid "10000004-0000-0000-0000-000000000001")
+    (at 145 95)
+    (property "Reference" "H4"
+      (at 0 3 0)
+      (layer "F.SilkS")
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+  )
+
+  ;; ========== COMPONENT ZONES ==========
+  
+  ;; ZONE 1: ARDUINO MEGA AREA (Left side, 50mm x 100mm)
+  (gr_rect
+    (start 0 0)
+    (end 55 100)
+    (stroke (width 0.15) (type dash))
+    (fill none)
+    (layer "Dwgs.User")
+    (uuid "20000001-0000-0000-0000-000000000001")
+  )
+  (gr_text "ARDUINO MEGA 2560 ZONE"
+    (at 27.5 10 0)
+    (layer "F.SilkS")
+    (effects (font (size 2 2) (thickness 0.3)))
+    (uuid "20000001-0000-0000-0000-000000000002")
+  )
+
+  ;; ZONE 2: DDS & RF SECTION (Center-Right, RF signal chain)
+  (gr_rect
+    (start 55 0)
+    (end 110 50)
+    (stroke (width 0.15) (type dash))
+    (fill none)
+    (layer "Dwgs.User")
+    (uuid "20000002-0000-0000-0000-000000000001")
+  )
+  (gr_text "RF SIGNAL CHAIN"
+    (at 82.5 10 0)
+    (layer "F.SilkS")
+    (effects (font (size 2 2) (thickness 0.3)))
+    (uuid "20000002-0000-0000-0000-000000000002")
+  )
+
+  ;; ZONE 3: MOTOR DRIVER AREA (Bottom right)
+  (gr_rect
+    (start 55 50)
+    (end 110 100)
+    (stroke (width 0.15) (type dash))
+    (fill none)
+    (layer "Dwgs.User")
+    (uuid "20000003-0000-0000-0000-000000000001")
+  )
+  (gr_text "MOTOR DRIVER"
+    (at 82.5 60 0)
+    (layer "F.SilkS")
+    (effects (font (size 2 2) (thickness 0.3)))
+    (uuid "20000003-0000-0000-0000-000000000002")
+  )
+
+  ;; ZONE 4: POWER & CONNECTORS (Right edge)
+  (gr_rect
+    (start 110 0)
+    (end 150 100)
+    (stroke (width 0.15) (type dash))
+    (fill none)
+    (layer "Dwgs.User")
+    (uuid "20000004-0000-0000-0000-000000000001")
+  )
+  (gr_text "POWER & I/O"
+    (at 130 10 0)
+    (layer "F.SilkS")
+    (effects (font (size 2 2) (thickness 0.3)))
+    (uuid "20000004-0000-0000-0000-000000000002")
+  )
+
+  ;; ========== TEXT LABELS ==========
+  
+  ;; Title
+  (gr_text "MANYETIK LOOP AUTO-TUNER v4.0"
+    (at 75 97 0)
+    (layer "F.SilkS")
+    (effects (font (size 3 3) (thickness 0.4)))
+    (uuid "30000001-0000-0000-0000-000000000001")
+  )
+
+  ;; Pin Labels for Arduino connections
+  (gr_text "Pin 51 - DDS_SDATA"
+    (at 45 20 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000002-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 52 - DDS_SCLK"
+    (at 45 23 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000003-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 53 - DDS_FSYNC"
+    (at 45 26 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000004-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 4 - MOTOR_PUL"
+    (at 45 30 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000005-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 3 - MOTOR_DIR"
+    (at 45 33 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000006-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 9 - MOTOR_ENA"
+    (at 45 36 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000007-0000-0000-0000-000000000001")
+  )
+  (gr_text "Pin 10 - RF_AMP_EN"
+    (at 45 39 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000008-0000-0000-0000-000000000001")
+  )
+  (gr_text "A0 - SWR_FWD"
+    (at 45 43 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000009-0000-0000-0000-000000000001")
+  )
+  (gr_text "A1 - SWR_REF"
+    (at 45 46 0)
+    (layer "F.SilkS")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (uuid "30000010-0000-0000-0000-000000000001")
+  )
+
+  ;; RF Chain Labels
+  (gr_text "AD9833 -> RF_AMP -> ATTEN -> SWR_BRIDGE -> ANT"
+    (at 82.5 15 0)
+    (layer "F.SilkS")
+    (effects (font (size 1.2 1.2) (thickness 0.2)))
+    (uuid "30000011-0000-0000-0000-000000000001")
+  )
+
+  ;; Power Labels
+  (gr_text "+5V INPUT"
+    (at 130 25 0)
+    (layer "F.SilkS")
+    (effects (font (size 1.5 1.5) (thickness 0.2)))
+    (uuid "30000012-0000-0000-0000-000000000001")
+  )
+  (gr_text "+12V INPUT"
+    (at 130 40 0)
+    (layer "F.SilkS")
+    (effects (font (size 1.5 1.5) (thickness 0.2)))
+    (uuid "30000013-0000-0000-0000-000000000001")
+  )
+  (gr_text "SMA ANT OUT"
+    (at 130 55 0)
+    (layer "F.SilkS")
+    (effects (font (size 1.5 1.5) (thickness 0.2)))
+    (uuid "30000014-0000-0000-0000-000000000001")
+  )
+
+  ;; ========== GROUND PLANE (Bottom Layer) ==========
+  
+  (zone
+    (net 1)
+    (net_name "GND")
+    (layer "B.Cu")
+    (uuid "40000001-0000-0000-0000-000000000001")
+    (hatch edge 0.5)
+    (connect_pads (clearance 0.5))
+    (min_thickness 0.25)
+    (filled_areas_thickness no)
+    (fill yes (thermal_gap 0.5) (thermal_bridge_width 0.5))
+    (polygon
+      (pts
+        (xy 2 2)
+        (xy 148 2)
+        (xy 148 98)
+        (xy 2 98)
+      )
+    )
+  )
+
+  ;; ========== COMPONENT PLACEMENT NOTES ==========
+  
+  ;; NOTE: This is a layout guide. Actual component footprints
+  ;; should be imported when opening in KiCad.
+  
+  ;; ARDUINO MEGA 2560 SHIELD CONNECTORS:
+  ;; - Position: (27.5, 50) - centered in Arduino zone
+  ;; - 2x18 pin header (digital pins)
+  ;; - 2x8 pin header (analog pins)
+  ;; - 2x3 pin header (power)
+  
+  ;; AD9833 MODULE:
+  ;; - Position: (65, 25) - start of RF chain
+  ;; - 6-pin connector (VCC, GND, DAT, CLK, FSY, GND)
+  ;; - SMA output connector
+  
+  ;; RF AMPLIFIER MODULE:
+  ;; - Position: (80, 25) - after AD9833
+  ;; - 4-pin connector (VCC, GND, RFIN, RFOUT)
+  ;; - SMA input/output
+  
+  ;; 5V RELAY MODULE:
+  ;; - Position: (95, 25) - near RF amp
+  ;; - 6-pin connector (VCC, GND, IN, NC, COM, NO)
+  
+  ;; TB6600 DRIVER CONNECTOR:
+  ;; - Position: (82.5, 75) - motor driver zone
+  ;; - 9-pin terminal block
+  
+  ;; AD8307 #1 (FWD):
+  ;; - Position: (75, 35)
+  ;; - 4-pin connector (VCC, GND, IN, OUT)
+  
+  ;; AD8307 #2 (REF):
+  ;; - Position: (90, 35)
+  ;; - 4-pin connector (VCC, GND, IN, OUT)
+  
+  ;; SWR BRIDGE CONNECTOR:
+  ;; - Position: (100, 35)
+  ;; - 4-pin connector (IN, OUT, FWD, REF)
+  
+  ;; 20dB ATTENUATOR:
+  ;; - Position: (105, 25)
+  ;; - Inline SMA
+  
+  ;; POWER CONNECTORS:
+  ;; - 5V DC Jack: (130, 20)
+  ;; - 12V DC Jack: (130, 35)
+  ;; - Motor Power: (130, 75)
+  
+  ;; SMA ANTENNA OUTPUT:
+  ;; - Position: (130, 50) - edge mount
+  
+  ;; ROTARY ENCODER CONNECTOR:
+  ;; - Position: (15, 70)
+  ;; - 5-pin header
+  
+  ;; BUTTON CONNECTORS:
+  ;; - BTN_FWD: (15, 80)
+  ;; - BTN_REV: (15, 85)
+  ;; - 2-pin headers
+
+  ;; ========== TRACK WIDTH GUIDELINES ==========
+  
+  ;; Power tracks (5V, 12V, GND): 1.0mm minimum
+  ;; Signal tracks: 0.3mm-0.5mm
+  ;; RF tracks (50Ω): Use coplanar waveguide or controlled impedance
+  ;; SPI signals (DDS): 0.25mm, keep short and parallel
+
+)
