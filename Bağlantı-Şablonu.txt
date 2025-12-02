@@ -1,11 +1,11 @@
 # MANYETİK LOOP AUTO-TUNER - DETAYLI BAĞLANTI ŞEMASI
 # Tüm Sistem - Her Parça ve Kablo
-# DDS: AD9833 (0-12.5 MHz, Direkt Sinüs Çıkışı)
+# DDS: AD9851 (0-60+ MHz, Sinüs Çıkışı)
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║                    MANYETİK LOOP AUTO-TUNER SİSTEM DİYAGRAMI                  ║
-║                    v4.0 FINAL - AD9833 DDS İLE                                 ║
+║                    v4.0 FINAL - AD9851 DDS İLE                                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 
@@ -67,48 +67,45 @@
 
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    DDS SİNYAL ÜRETİCİSİ - AD9833                             │
+│                    DDS SİNYAL ÜRETİCİSİ - AD9851                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                     ┌────────────────────────────────────┐
-                    │     AD9833 MODÜL (Üstten Görünüş)  │
+                    │     AD9851 MODÜL (Üstten Görünüş)  │
                     ├────────────────────────────────────┤
-                    │  GND  PGA  SMA  VOUT  GND         │  ← Üst sıra
-                    │  CS   DAT  CLK  FSY   GND   VCC   │  ← Alt sıra
+                    │  GND   SMA  SINE  GND             │  ← Üst sıra (modüle göre değişir)
+                    │  DATA  W_CLK  FQ_UD  RESET  VCC   │  ← Alt sıra (kontrol hatları)
                     └────────────────────────────────────┘
 
          Pin Açıklamaları:
-         • VCC:  Arduino 5V       → Alt sıra, en sağ
-         • GND:  Arduino GND      → 4 adet (herhangi biri)
-         • FSY:  Arduino Pin 53   → Alt sıra (FSYNC)
-         • CLK:  Arduino Pin 52   → Alt sıra (SCLK)
-         • DAT:  Arduino Pin 51   → Alt sıra (SDATA)
-         • CS:   Boş bırak        → Alt sıra (kullanılmıyor)
-         • PGA:  Boş bırak        → Üst sıra (kullanılmıyor)
-         • VOUT: Test çıkışı      → Üst sıra (pin header)
-         • SMA:  RF çıkış ✓       → Üst sıra (dişi konnektör)
+         • VCC:   Arduino 5V        → Alt sıra
+         • GND:   Arduino GND       → Üst/alt (herhangi biri)
+         • DATA:  Arduino Pin 51    → Seri veri (LSB-first)
+         • W_CLK: Arduino Pin 52    → Word Clock
+         • FQ_UD: Arduino Pin 53    → Frequency Update
+         • RESET: Arduino Pin 49    → Reset
+         • SINE:  Sine OUT (pin header) → Alternatif RF çıkış
+         • SMA:   RF çıkış ✓ (varsa modülde)
 
                         ┌──────────────────────┐
-                        │    AD9833 Bağlantı   │
+                            │    AD9851 Bağlantı   │
                         │    Şema Detayı       │
                         ├──────────────────────┤
-    Arduino 5V ────────►│ VCC (alt-sağ)        │
-    Arduino GND ───────►│ GND (4 pindenherhangi)│
+            Arduino 5V ────────►│ VCC                  │
+            Arduino GND ───────►│ GND                  │
                         │                      │
-    Arduino Pin 51 ────►│ DAT (alt-2)          │
-    Arduino Pin 52 ────►│ CLK (alt-3)          │
-    Arduino Pin 53 ────►│ FSY (alt-4)          │
+            Arduino Pin 51 ────►│ DATA                 │
+            Arduino Pin 52 ────►│ W_CLK                │
+            Arduino Pin 53 ────►│ FQ_UD                │
+            Arduino Pin 49 ────►│ RESET                │
                         │                      │
-                        │ CS  (alt-1) [Boş]    │
-                        │ PGA (üst-2) [Boş]    │
-                        │                      │
-                   ┌────┤ SMA Dişi (üst-3)     │
-                   │    │ [600mV p-p]          │
+                        ┌────┤ SMA Dişi (RF OUT)    │
+                        │    │ (seviye modüle bağlı)│
                    │    │                      │
-                   │    │ VOUT (üst-4)─────────┼──┐ [Alternatif]
+                        │    │ SINE OUT ────────────┼──┐ [Alternatif]
                    │    └──────────────────────┘  │
                    │                               │
-                   │ RF OUT (50Ω, Single-ended)    │
+                        │ RF OUT (50Ω, sinüs)           │
                    │ [Direkt kullanıma hazır!]     │
                    ▼                               ▼
 
@@ -126,7 +123,7 @@
          Pin Açıklamaları:
          • VCC:   12V/2A güç      → Röle NO (Normally Open)
          • GND:   Toprak          → Ortak GND bus
-         • RFIN:  RF girişi       → AD9833 SMA OUT
+         • RFIN:  RF girişi       → AD9851 SMA OUT
          • RFOUT: RF çıkışı       → 20dB Attenuator
 
          NOT: Enable pin YOK - Röle ile kontrol edilir!
@@ -139,7 +136,7 @@
     Röle NO ───────────►│ VCC (12V/2A)         │
     Ortak GND ─────────►│ GND                  │
                         │                      │
-    AD9833 SMA ────────►│ RFIN (50Ω)           │
+    AD9851 SMA ────────►│ RFIN (50Ω)           │
                         │ [SMA Dişi Konnektör] │
                         │                      │
                         │ RFOUT (50Ω) ─────────┼──┐
@@ -258,6 +255,36 @@ FWD►│ IN: FWD Sample          │     REF►│ IN: REF Sample          │
                             A0 ──┘                              A1 ──┘
                        (Arduino Mega)                     (Arduino Mega)
 
+    ══════════════════════════════════════════════════════════════════════════════
+      OPSİYONEL: AD8307 VOUT - SMA DİŞİ TEST PORTU
+    ══════════════════════════════════════════════════════════════════════════════
+
+    Amaç:
+        • AD8307 DC çıkışını (VOUT, ~0–2.5V) dışarıdan güvenli şekilde ölçmek.
+
+    Konnektör:
+        • Panel tipi SMA dişi: Merkez pim = sinyal, gövde/dişler = GND.
+
+    Bağlantı Şeması:
+        AD8307 OUT (VOUT) ──[1k seri direnç]──► SMA Merkez Pim
+        GND ──────────────────────────────────► SMA Gövde (Shield)
+        (Opsiyonel) 100nF kondansatör: Merkez pimden GND’ye (HF gürültü filtresi)
+
+    Topoloji (T bağlantı):
+        AD8307 OUT ──┬──► Arduino A0/A1 (yüksek empedans okuma)
+                      └──[1k]──► SMA Test Portu (koruma/ESD önlemi)
+
+    Kablo:
+        • Kısa RG174/ince koaks kullan (<15 cm). Shield’ı ortak GND bus’a bağla.
+
+    Ölçüm Cihazı:
+        • 1 MΩ girişli osiloskop/voltmetre ile ölç (DC hat!).
+        • 50 Ω terminasyon kullanma; çıkışı aşırı yükler ve okuma hatalı olur.
+
+    Notlar:
+        • Bu hat RF değil; sadece DC/logaritmik seviye ölçümü için.
+        • Harici ESD’ye karşı seri 1k + TVS diyot (opsiyonel) eklenebilir.
+
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                   STEP MOTOR DRIVER - TB6600                                 │
@@ -357,7 +384,7 @@ FWD►│ IN: FWD Sample          │     REF►│ IN: REF Sample          │
                           │
 [5V/2A PSU]  ──┬─── 5V ───┼──► [Arduino Mega VIN]
                │          │
-               │          ├──► [AD9833 VCC] (3.3V modülse Arduino 3.3V)
+               │          ├──► [AD9851 VCC]
                │          │
                │          ├──► [AD8307 #1 VCC]
                │          │
@@ -375,18 +402,14 @@ FWD►│ IN: FWD Sample          │     REF►│ IN: REF Sample          │
 
 
 ══════════════════════════════════════════════════════════════════════════════
-  SPI İLETİŞİM (Arduino ↔ AD9833)
+    DDS KONTROL (Arduino ↔ AD9851)
 ══════════════════════════════════════════════════════════════════════════════
-
-Arduino Pin 51 (MOSI) ────[Kablo]───► AD9833 DAT (SDATA)
-Arduino Pin 52 (SCK)  ────[Kablo]───► AD9833 CLK (SCLK)
-Arduino Pin 53 (SS)   ────[Kablo]───► AD9833 FSY (FSYNC)
-Arduino 5V            ────[Kablo]───► AD9833 VCC
-Arduino GND           ────[Kablo]───► AD9833 GND (4 pinden herhangi biri)
-
-KULLANILMAYAN PİNLER:
-    • CS:  Boş bırakılır (alternatif chip select)
-    • PGA: Boş bırakılır (programlanabilir kazanç - harici ayar)
+Arduino Pin 51 ────[Kablo]───► AD9851 DATA
+Arduino Pin 52 ────[Kablo]───► AD9851 W_CLK
+Arduino Pin 53 ────[Kablo]───► AD9851 FQ_UD
+Arduino Pin 49 ────[Kablo]───► AD9851 RESET
+Arduino 5V      ────[Kablo]───► AD9851 VCC
+Arduino GND     ────[Kablo]───► AD9851 GND
 
 
 ══════════════════════════════════════════════════════════════════════════════
@@ -414,7 +437,7 @@ Arduino 5V ───┬──[Kablo]───► TB6600 PUL+ (Pull-up)
   RF ZİNCİRİ (Signal Path)
 ══════════════════════════════════════════════════════════════════════════════
 
-AD9833 SMA Dişi Konnektör (600mV p-p sinüs, 50Ω)
+AD9851 SMA Dişi Konnektör (sinüs, 50Ω; seviye modüle bağlı)
     │
     │ [Direkt bağlantı - Balun/Transformer gerekmez!]
     │
@@ -423,8 +446,8 @@ AD9833 SMA Dişi Konnektör (600mV p-p sinüs, 50Ω)
     ▼
 RF Amplifier IN (SMA Dişi)
 
-ALTERNATİF: VOUT Pin Kullanımı
-    AD9833 VOUT (pin header)
+ALTERNATİF: SINE OUT Pin Kullanımı
+    AD9851 SINE OUT (pin header)
         │
         │ [Jumper kablo veya ince tel]
         │ [BNC adaptör eklenebilir]
@@ -532,9 +555,9 @@ Vakum Kapasitör Şaftı (Loop Anten Tune)
 ╚═════════════════════════════════════════════════════════════════════════════╝
 
 RF Kabloları (50Ω Koaksiyel):
-    • AD9833 SMA → RF Amp:    15cm (SMA Erkek-Erkek, RG174)
+    • AD9851 SMA → RF Amp:    15cm (SMA Erkek-Erkek, RG174)
     • RF Amp → Attenuator:    15cm (RG174)
-    • Alternatif: VOUT → RF Amp: 10cm (jumper kablo - önerilmez)
+    • Alternatif: SINE OUT → RF Amp: 10cm (jumper kablo - önerilmez)
     • Attenuator → SWR Bridge: 15cm (RG174)
     • SWR Bridge → Anten:     50cm-1m (RG58 veya RG213)
 
@@ -544,10 +567,10 @@ Güç Kabloları:
     • Arduino 5V dağıtım:     20cm her modül için
 
 Sinyal Kabloları:
-    • Arduino → AD9833:       15cm (Dupont jumper 3 adet: DAT,CLK,FSY)
+    • Arduino → AD9851:       15cm (Dupont jumper 4 adet: DATA,W_CLK,FQ_UD,RESET)
     • Arduino → AD8307:       20cm (Dupont jumper 2 adet)
     • Arduino → Röle Modül:   15cm (Dupont jumper 3 adet: VCC,GND,IN)
-    • GND ve VCC:             15cm (Dupont jumper, AD9833 güç)
+    • GND ve VCC:             15cm (Dupont jumper, AD9851 güç)
     • Arduino → TB6600:       25cm (Dupont jumper 3 adet)
     • Arduino → Encoder:      20cm (Dupont jumper 5 adet)
     • Arduino → Butonlar:     30cm (2 telli kablo, 2 adet)
@@ -577,14 +600,14 @@ Sinyal Bağlantıları:
 
 
 ╔═════════════════════════════════════════════════════════════════════════════╗
-║                      AD9833 ÇIKIŞ BAĞLANTISI                                 ║
+║                      AD9851 ÇIKIŞ BAĞLANTISI                                 ║
 ╚═════════════════════════════════════════════════════════════════════════════╝
 
-AD9833 modülünde 2 farklı RF çıkışı var:
+AD9851 modülünde 2 farklı RF çıkışı bulunabilir (modüle göre):
 
 SEÇENEK 1: SMA DİŞİ KONNEKTÖR (Önerilen ✓)
     ┌────────────┐
-    │  AD9833    │     [SMA Erkek-Erkek]
+    │  AD9851    │     [SMA Erkek-Erkek]
     │            │     [Koaksiyel Kablo]
     │ [SMA Dişi] ┼═══════════════════► RF Amp IN
     │            │     (RG174, 15cm)
@@ -597,11 +620,11 @@ SEÇENEK 1: SMA DİŞİ KONNEKTÖR (Önerilen ✓)
     ✓ RF kalkanlaması mükemmel
     ✓ Tak-çalıştır
 
-SEÇENEK 2: VOUT PİNİ (Alternatif)
+SEÇENEK 2: SINE OUT PİNİ (Alternatif)
     ┌────────────┐
-    │  AD9833    │
+    │  AD9851    │
     │            │     [Jumper kablo]
-    │ VOUT ──────┼────────────► RF Amp IN
+    │ SINE OUT ──┼────────────► RF Amp IN
     │            │     (ince tel 10-15cm)
     │ GND ───────┼──► GND
     │            │
@@ -612,15 +635,14 @@ SEÇENEK 2: VOUT PİNİ (Alternatif)
     • Uzun mesafelerde sinyal kaybı
     • RF parazit alabilir
 
-Her iki çıkış da aynı sinyali verir:
-    • 600mV p-p (~30mW güç)
-    • Direkt 50Ω çıkış
-    • HF bandı için ideal
-    • Balun/transformer gerekmez!
+Notlar:
+    • RF seviye modül tasarımına bağlıdır (tipik sinüs çıkışı).
+    • 50Ω empedans hedeflenir.
+    • HF için uygundur; ek LPF ile harmonikler azaltılabilir.
 
 OPSİYONEL: RC Filtre (Harmonik Azaltma)
     ┌────────────┐
-    │  AD9833    │         100Ω     100pF
+    │  AD9851    │         100Ω     100pF
     │            │          ┌─┐      ┌─┐
     │ VOUT ──────┼─────────┤ ├──┬───┤ ├─── RF Amp IN
     │            │          └─┘  │   └─┘
@@ -631,13 +653,13 @@ OPSİYONEL: RC Filtre (Harmonik Azaltma)
     • 3. harmonik bastırma
     • Daha temiz sinüs
     • Çoğu uygulamada gereksiz
-    • VOUT pininden çıkış alınırsa kullanılabilir
+    • SINE OUT veya SMA hattında opsiyonel kullanılabilir
 
-AD9833 vs AD9850 KARŞILAŞTIRMA:
+AD9851 vs AD9833 KARŞILAŞTIRMA:
     ┌────────────────┬──────────────┬──────────────┐
-    │  Özellik       │   AD9833     │   AD9850     │
+    │  Özellik       │   AD9833     │   AD9851     │
     ├────────────────┼──────────────┼──────────────┤
-    │ Frekans Max    │  12.5 MHz    │  40 MHz      │
+    │ Frekans Max    │  12.5 MHz    │  60+ MHz     │
     │ Çıkış Tipi     │  Single-end  │  Diferansiyel│
     │ Çıkış Gücü     │  600mV p-p   │  200mW p-p   │
     │ Balun Gerekli? │  HAYIR ✓     │  Evet/Tercih │
@@ -647,7 +669,113 @@ AD9833 vs AD9850 KARŞILAŞTIRMA:
     │ HF için        │  İdeal ✓     │  İyi         │
     └────────────────┴──────────────┴──────────────┘
 
-ÖNERİ: AD9833 kullan - Direkt bağlantı, daha az karmaşık, HF için yeterli!
+ÖNERİ: AD9851 kullan - Tüm HF + 6 m kapsaması, projeye uygun!
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║          TRANSCEIVER ENTEGRASYONU - HARİCİ TELSİZ BAĞLANTISI                ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+
+Amaç:
+    İç DDS zinciri (tune modu için düşük güç) ve harici HF/6m telsiz (operasyon modu, yüksek güç) arasında antene giden yolu seçmek.
+
+Temel Sorun:
+    Mevcut diyagramda antene sadece iç zincir (AD9851 → RF Amp → Attenuator → SWR Bridge → Loop) gider. Harici TRX girişi yok.
+
+Çözüm Mimarisi (İki Mod):
+    1. TUNE MODU (Düşük güç): Kaynak = AD9851 zinciri. Telsiz devreden izole.
+    2. OPERATE MODU (Yüksek güç): Kaynak = Harici TRX. İç DDS zinciri anten hattından röle ile ayrılır.
+
+Gerekli Ek Bileşenler:
+    • RF Seçim Rölesi (SPDT veya DPDT, HF 0–60 MHz, örn. 100W max) veya Koaksiyel RF Rölesi.
+    • (Opsiyonel) İkinci Röle: Attenuator / DDS zincirini tamamen ayırmak veya TRX gücünde köprülemek.
+    • Harici TRX konnektörü: SO239 (PL-259), veya BNC/SMA (güce göre). Genellikle SO239 veya N-Type tercih edilir.
+    • Yüksek Güç SWR Ölçümü için uygun bir SWR köprüsü (mevcut düşük güç versiyonu transceiver çıkış gücünü kaldıramayabilir!).
+
+Basitleştirilmiş Blok Diyagram:
+    ┌──────────┐        ┌──────────────┐        ┌─────────────┐        ┌──────────┐
+    │ Harici   │        │  RF Seçim    │ TUNE→  │  DDS Zinciri │        │  Loop     │
+    │  TRX     │─►COAX─►│  Rölesi (R1) │───────►│(Amp+Atten+   │─►SWR──►│ Anteni    │
+    │ (TX/RX)  │        │   Ortak)     │        │  SWR Bridge) │        │          │
+    └──────────┘        │              │        └─────────────┘        └──────────┘
+           ▲            │              │ OPERATE                                    
+           │            │              │ MODE→ ───────────────► (Yüksek Güç SWR / Direkt Besleme) ─► Loop
+           │            └──────────────┘
+
+Omron G5RV-2-12V (DPDT) Bağlantı Detayı:
+    • Tip: DPDT röle, iki ayrı kontak seti (A ve B). Her sette COM, NO, NC uçları.
+    • Kullanım: Bir seti sinyal merkez iletken için, diğer seti koaks kalkan/şase anahtarlamak için kullan.
+
+    Kontak A (Merkez İletken):
+        COM  ──► Anten besleme hattı (SWR Bridge INPUT veya vakum kapasitör besleme)
+        NO   ──► Harici TRX merkez (SO239 center pin)
+        NC   ──► DDS zinciri merkez (Attenuator OUT)
+
+    Kontak B (Kalkan/Şase):
+        COM  ──► Anten koaks kalkanı/şase (loop besleme noktası şasesi)
+        NO   ──► Harici TRX koaks kalkanı
+        NC   ──► DDS zinciri koaks kalkanı
+
+    Bobin Bağlantısı:
+        • Röle bobini: 12V. Bir ucu +12V, diğer ucu NPN sürücü üzerinden GND’ye.
+        • Arduino Pin (ör. Pin 11 → RF_MODE) → NPN baz direnci (10k) → NPN (2N2222). Kolektör röle bobin ucuna, emiter GND.
+        • Bobin üzerine ters paralel diyot (1N4148/1N4007) ekle (flyback).
+        • Mantık: RF_MODE HIGH → NPN iletken → röle çeker → NO devrede (OPERATE). RF_MODE LOW → röle bırakırsın → NC devrede (TUNE).
+
+    Kablolama Notları:
+        • Koaks merkez hatları için mümkün olan en kısa hat; kalkanı 360° şaseye bağla.
+        • DPDT kullanımı ile kalkanlar da anahtarlanarak sızıntı/loop’lar azaltılır.
+        • Röleyi anten besleme noktasına yakın monte et; geniş bakır şase kullan.
+
+    Güvenlik:
+        • Geçiş sırasında TX yapma.
+        • Tune modunda TRX çıkış verme (PTT kilidi önerilir).
+
+Detaylı Röle Konfigürasyonu (Örnek SPDT):
+    • Ortak (COM): Antene giden hat (SWR Bridge çıkışı veya doğrudan Vakum Kapasitör besleme noktası).
+    • KONTAK 1 (TUNE): DDS zinciri çıkışı (Attenuator sonrası düşük güç).
+    • KONTAK 2 (OPERATE): Harici TRX çıkışı.
+    • Röle bobini Arduino tarafından kontrol (ayrı dijital pin, örn. Pin 11 → RF_MODE). HIGH = Operate, LOW = Tune.
+
+Güç Notları:
+    • Mevcut T50-2 tabanlı SWR Bridge sadece düşük güce uygun (mW seviyeleri). Transceiver’de (ör. 50W) kullanmak istiyorsan: Daha büyük toroid (ör. FT82-43) ve uygun direnç ağıyla yüksek güç SWR köprüsü tasarla.
+    • Alternatif: Tune modunda düşük güç iç sinyal kullan, optimum kapasitör ayarını bul, sonra röleyi OPERATE’a geçir ve transceiver ile çalış. Bu durumda düşük güç SWR Bridge anten hattından ayrılabilir veya paralel kalabilir (uygun izolatör ekle).
+
+Kablolama Önerisi:
+    Harici TRX Konnektörü (SO239):
+        SO239 Merkez ──► Röle KONTAK 2
+        SO239 Şase  ───► Ortak GND / Kutu
+
+    DDS Zinciri Çıkışı (Attenuator OUT):
+        Merkez ─────────► Röle KONTAK 1
+        Shield ─────────► GND (aynı kablo kalkanı)
+
+    Röle COM:
+        Merkez ─────────► Mevcut SWR Bridge INPUT (veya güç SWR köprüsü giriş noktası)
+
+Arduino Kontrol (Yeni Pin Örneği):
+    Pin 11 (RF_MODE) → Röle IN (aktif LOW/HIGH modüle göre)
+    Kod mantığı:
+        Tune Modu: RF_MODE = LOW → Röle TUNE kontak (DDS) bağlı
+        Operate Modu: RF_MODE = HIGH → Röle OPERATE kontak (TRX) bağlı
+
+Koruma / Güvenlik:
+    • Tune modunda TRX kesinlikle RF çıkış yapmamalı (PTT kilidi veya kullanıcı uyarısı).
+    • Röle geçişi sırasında TX yapma (ark oluşumu / kontak zarar riski).
+    • Yüksek güç için koaksiyel röle veya düşük kayıplı HF güç rölesi seç.
+    • Ortak GND ve şase düşük empedanslı olmalı (geniş bakır yüzey / şerit).
+
+Opsiyonel Gelişmiş Yöntem (Yönlü Kuplör Enjeksiyonu):
+    • DDS düşük güç sinyali harici TRX hattına yönlü kuplör üzerinden enjekte edilir (Coupler -20dB port).
+    • Böylece fiziksel kaynak seçme rölesi gerekmez; DDS sadece test anlarında kısa süre besler.
+    • Kuplör portu izolasyon: >30dB; TRX yüksek gücü DDS zincirine geri yansımaz.
+
+Basitlik İçin Sonuç:
+    • İlk uygulamada tek SPDT RF rölesi + harici SO239 konnektörü ekle.
+    • Tune: Röle iç zinciri antene bağlar.
+    • Operate: Röle harici TRX’i antene bağlar, iç zincir izole olur.
+
+Not Ekleme (MONTAJ SIRASI Bölümüne):
+    ADIM 8 (Opsiyonel): Harici TRX rölesi ve konnektörü montajı, fonksiyon testi.
 
 
 ╔═════════════════════════════════════════════════════════════════════════════╗
@@ -662,12 +790,12 @@ ADIM 1: Güç Dağıtımı
     ✓ TEST: Multimetre ile voltajları kontrol et
 
 ADIM 2: DDS Bağlantısı
-    ✓ AD9833 VCC → Arduino 5V
-    ✓ AD9833 GND → Arduino GND (4 pinden herhangi biri)
-    ✓ AD9833 FSY → Arduino Pin 53
-    ✓ AD9833 CLK → Arduino Pin 52
-    ✓ AD9833 DAT → Arduino Pin 51
-    ✓ CS ve PGA pinlerini boş bırak
+    ✓ AD9850 VCC → Arduino 5V
+    ✓ AD9850 GND → Arduino GND
+    ✓ AD9850 FQ_UD → Arduino Pin 53
+    ✓ AD9850 W_CLK → Arduino Pin 52
+    ✓ AD9850 DATA  → Arduino Pin 51
+    ✓ AD9850 RESET → Arduino Pin 49
     ✓ TEST: Kodu yükle, frekans ayarla
 
 ADIM 3: RF Zinciri + Röle Modülü
@@ -677,8 +805,8 @@ ADIM 3: RF Zinciri + Röle Modülü
     ✓ 12V PSU → Röle COM
     ✓ Röle NO  → RF Amp VCC
     ✓ RF Amp GND → Ortak GND
-    ✓ AD9833 SMA Dişi → SMA Erkek-Erkek kablo → RF Amp RFIN
-    ✓ (Alternatif: VOUT pin → jumper kablo → RF Amp RFIN)
+    ✓ AD9850 SMA Dişi → SMA Erkek-Erkek kablo → RF Amp RFIN
+    ✓ (Alternatif: SINE OUT pin → jumper kablo → RF Amp RFIN)
     ✓ RF Amp RFOUT → Attenuator (koax)
     ✓ Attenuator → SWR Bridge (koax)
     ✓ TEST: Serial'den R komutu → Röle tik sesi duyulmalı
@@ -726,10 +854,10 @@ ADIM 7: Final Test
 3. Güç Filtreleme:
     • Her modülün VCC girişine 100nF seramik kondansatör
     • RF Amp gücüne 100uF elektrolitik + 100nF seramik
-    • AD9850'ye 10uF + 100nF + 10nF (3'lü)
+    • AD9851'e 10uF + 100nF + 10nF (3'lü)
 
 4. Fiziksel Yerleşim:
-    • RF modüller bir tarafta (AD9850, Amp, SWR Bridge)
+    • RF modüller bir tarafta (AD9851, Amp, SWR Bridge)
     • Dijital modüller diğer tarafta (Arduino, TB6600)
     • AD8307'ler RF kaynağından uzak
     • Motor sürücüsü Arduino'dan uzak
@@ -763,7 +891,7 @@ ADIM 7: Final Test
     • Güç kaynakları yeterli akım sağlamalı
 
 ⚠️  RF:
-    • AD9833 frekans aralığı: 0-12.5 MHz (HF için ideal)
+    • AD9851 frekans aralığı: 0–60+ MHz (HF komple + 6 m)
     • 50Ω empedans uyumu kritik
     • SMA konnektörler sıkıca takılmalı
     • Uzun RF kablolarında kayıp artar
@@ -788,9 +916,9 @@ ADIM 7: Final Test
 2. DDS TESTİ:
    □ Serial'den F7.100 komutunu gönder
    □ Osiloskop probu:
-      • SMA çıkışına (BNC→SMA adaptör ile), VEYA
-      • VOUT pinine (direkt prob)
-   □ Beklenen: 7.100 MHz sinüs, 600mV p-p
+        • SMA çıkışına (BNC→SMA adaptör ile), VEYA
+        • SINE OUT pinine (direkt prob)
+    □ Beklenen: 7.100 MHz sinüs (seviye modüle bağlı)
    □ Frekans counter ile doğrula
 
 3. RF AMP + RÖLE TESTİ:

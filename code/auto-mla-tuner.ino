@@ -1,4 +1,4 @@
-// Manyetik Loop Auto-Tuner v4.0 FINAL - AD9833 DDS ile
+// Manyetik Loop Auto-Tuner v4.0 FINAL - AD9851 DDS ile
 // Telsizden Bağımsız Sistem + Çin Klonu RF Amp (1MHz-3000MHz)
 //
 // BAĞLANTILAR:
@@ -8,12 +8,13 @@
 // TB6600 ENA- -> PIN9
 // TB6600 PUL+/DIR+/ENA+ -> 5V
 //
-// === DDS (AD9833) ===
-// VCC -> 5V (bazı modüller 3.3V - kontrol et!)
+// === DDS (AD9851) ===
+// VCC -> 5V
 // GND -> GND
-// SDATA -> Pin 51 (MOSI)
-// SCLK -> Pin 52 (SCK)
-// FSYNC -> Pin 53 (SS/CS)
+// W_CLK  -> Pin 52
+// FQ_UD  -> Pin 53
+// DATA   -> Pin 51
+// RESET  -> Pin 49
 // OUT -> RF Amplifier IN (direkt 50Ω koax)
 //
 // === RF AMPLIFIER (1MHz-3000MHz Çin Klonu) ===
@@ -37,10 +38,11 @@
 #define BUTON_ILERI 7    // Saat yönünde döndürme
 #define BUTON_GERI 8     // Saat tersi döndürme
 
-// DDS (AD9833) Pinleri
-#define DDS_SDATA  51  // MOSI
-#define DDS_SCLK   52  // SCK
-#define DDS_FSYNC  53  // SS (Chip Select)
+// DDS (AD9851) Pinleri
+#define AD9851_DATA   51
+#define AD9851_WCLK   52
+#define AD9851_FQUD   53
+#define AD9851_RESET  49
 
 // SWR Ölçüm Pinleri
 #define SWR_FORWARD_PIN   A0
@@ -48,6 +50,8 @@
 
 // RF Amp Kontrol
 #define RF_AMP_ENABLE 10  // Röle IN (aktif LOW)
+// RF Seçim Rölesi (Omron G5RV-2-12V bobin sürümü için kontrol pin)
+#define RF_MODE_PIN 11    // NPN sürücüyü tetikleyen pin (HIGH=OPERATE/NO, LOW=TUNE/NC)
 
 // Değişkenler
 volatile long encoderDegeri = 0;
@@ -97,18 +101,24 @@ void setup() {
   pinMode(SWR_FORWARD_PIN, INPUT);
   pinMode(SWR_REFLECTED_PIN, INPUT);
   pinMode(RF_AMP_ENABLE, OUTPUT);
+  pinMode(RF_MODE_PIN, OUTPUT);
   
-  // DDS pinleri
-  pinMode(DDS_SDATA, OUTPUT);
-  pinMode(DDS_SCLK, OUTPUT);
-  pinMode(DDS_FSYNC, OUTPUT);
+  // DDS pinleri (AD9851)
+  pinMode(AD9851_DATA, OUTPUT);
+  pinMode(AD9851_WCLK, OUTPUT);
+  pinMode(AD9851_FQUD, OUTPUT);
+  pinMode(AD9851_RESET, OUTPUT);
   
   // Başlangıç durumları
   digitalWrite(STEP_PIN, LOW);
   digitalWrite(DIR_PIN, LOW);
   digitalWrite(ENABLE_PIN, LOW);  // Motor kapalı
   digitalWrite(RF_AMP_ENABLE, HIGH);  // Röle kapalı → RF Amp GÜÇ YOK
-  digitalWrite(DDS_FSYNC, HIGH);  // CS idle high
+  digitalWrite(RF_MODE_PIN, LOW);     // Başlangıç: TUNE modu (NC devrede)
+  digitalWrite(AD9851_DATA, LOW);
+  digitalWrite(AD9851_WCLK, LOW);
+  digitalWrite(AD9851_FQUD, LOW);
+  digitalWrite(AD9851_RESET, LOW);
   
   // DDS başlat
   ddsInit();
@@ -121,10 +131,10 @@ void setup() {
   Serial.println("\n");
   Serial.println("╔════════════════════════════════════════════╗");
   Serial.println("║  MANYETİK LOOP AUTO-TUNER v4.0 FINAL     ║");
-  Serial.println("║  TELSİZDEN BAĞIMSIZ SİSTEM - AD9833      ║");
+  Serial.println("║  TELSİZDEN BAĞIMSIZ SİSTEM - AD9851      ║");
   Serial.println("╚════════════════════════════════════════════╝");
   Serial.println();
-  Serial.println("📡 Sinyal Üreticisi: AD9833 DDS (25MHz)");
+  Serial.println("📡 Sinyal Üreticisi: AD9851 DDS (180MHz)");
   Serial.println("📶 RF Amplifier: 1MHz-3GHz Çin Klonu");
   Serial.println("🔬 SWR Ölçüm: AD8307 x2 (Logaritmik)");
   Serial.println("⚙️  Motor Kontrol: TB6600 + Step Motor");
@@ -136,6 +146,8 @@ void setup() {
   Serial.println("   F[frekans]     - Sadece frekans ayarla");
   Serial.println("   M              - SWR ölç");
   Serial.println("   R              - RF Aç/Kapat");
+  Serial.println("   MODE TUNE      - Röle: DDS (NC)");
+  Serial.println("   MODE OPERATE   - Röle: TRX (NO)");
   Serial.println("   SWEEP [s] [e]  - Band tarama");
   Serial.println("                    Örnek: SWEEP 7.0 7.3");
   Serial.println("   S              - Durum göster");
@@ -169,41 +181,44 @@ void setup() {
   Serial.println(" us");
   Serial.println("==========================================");
 }
-// ==================== AD9833 FONKSİYONLARI ====================
-void ddsWriteRegister(uint16_t data) {
-  digitalWrite(DDS_FSYNC, LOW);
-  for (int i = 15; i >= 0; i--) {
-    digitalWrite(DDS_SCLK, LOW);
-    digitalWrite(DDS_SDATA, (data >> i) & 0x01);
-    digitalWrite(DDS_SCLK, HIGH);
-  }
-  digitalWrite(DDS_FSYNC, HIGH);
+// ==================== AD9851 FONKSİYONLARI ====================
+#define AD9851_CLOCK 180000000.0
+#define AD9851_CONTROL 0x01  // Tipik: x6 PLL etkin
+
+inline void ad9851Pulse(uint8_t pin) {
+  digitalWrite(pin, HIGH);
+  digitalWrite(pin, LOW);
 }
 
-#define AD9833_B28   0x2000
-#define AD9833_MODE  0x0000
-#define AD9833_RESET 0x0100
-#define AD9833_CLOCK 25000000.0
+void ad9851WriteByte(uint8_t b) {
+  for (uint8_t i = 0; i < 8; i++) {
+    digitalWrite(AD9851_DATA, (b >> i) & 0x01); // LSB önce
+    ad9851Pulse(AD9851_WCLK);
+  }
+}
 
 void ddsInit() {
-  ddsWriteRegister(AD9833_RESET | AD9833_B28);
-  delay(10);
-  ddsWriteRegister(AD9833_B28);
+  // Reset sırası: RESET pulse, W_CLK pulse, FQ_UD pulse
+  ad9851Pulse(AD9851_RESET);
+  ad9851Pulse(AD9851_WCLK);
+  ad9851Pulse(AD9851_FQUD);
 }
 
 void ddsSetFrequency(float freqMHz) {
-  if (freqMHz < 0.0 || freqMHz > 12.5) {
-    Serial.println("⚠️ Frekans aralığı: 0-12.5 MHz");
+  if (freqMHz < 0.0 || freqMHz > 60.0) {
+    Serial.println("⚠️ Frekans aralığı: 0-60 MHz (AD9851)");
     return;
   }
   unsigned long freqHz = (unsigned long)(freqMHz * 1000000.0);
-  unsigned long freqReg = (unsigned long)((freqHz * 268435456.0) / AD9833_CLOCK);
-  uint16_t freqLSB = (uint16_t)(freqReg & 0x3FFF) | 0x4000;
-  uint16_t freqMSB = (uint16_t)((freqReg >> 14) & 0x3FFF) | 0x4000;
-  ddsWriteRegister(AD9833_B28);
-  ddsWriteRegister(freqLSB);
-  ddsWriteRegister(freqMSB);
-  ddsWriteRegister(AD9833_MODE);
+  // 32-bit tuning word: f_out = (word * f_clk) / 2^32
+  uint32_t tuning = (uint32_t)((freqHz * 4294967295.0) / AD9851_CLOCK);
+  // 5 bayt gönder: 4 bayt tuning word (LSB ilk), 1 bayt kontrol (AD9851_CONTROL)
+  ad9851WriteByte((uint8_t)(tuning & 0xFF));
+  ad9851WriteByte((uint8_t)((tuning >> 8) & 0xFF));
+  ad9851WriteByte((uint8_t)((tuning >> 16) & 0xFF));
+  ad9851WriteByte((uint8_t)((tuning >> 24) & 0xFF));
+  ad9851WriteByte(AD9851_CONTROL);
+  ad9851Pulse(AD9851_FQUD); // Güncelle
 }
 
 volatile unsigned long sonEncoderZamani = 0;
@@ -646,10 +661,22 @@ void serialEvent() {
       Serial.println("   F[freq]  - Frekans ayarla (F7.100)");
       Serial.println("   M        - SWR ölç");
       Serial.println("   R        - RF Aç/Kapat");
+      Serial.println("   MODE TUNE/OPERATE - RF seçim rölesi modu");
       Serial.println("   SWEEP    - Band tarama (SWEEP 7.0 7.3)");
       Serial.println("   S        - Durum");
       Serial.println("   ZERO     - Pozisyon sıfırla");
       Serial.println("   1/2/3    - Profil değiştir");
+    }
+    else if (komut.startsWith("MODE")) {
+      if (komut.indexOf("TUNE") > 0) {
+        digitalWrite(RF_MODE_PIN, LOW); // NC devrede → DDS zinciri
+        Serial.println("🔀 RF MODE: TUNE (DDS → anten)");
+      } else if (komut.indexOf("OPERATE") > 0) {
+        digitalWrite(RF_MODE_PIN, HIGH); // NO devrede → TRX
+        Serial.println("🔀 RF MODE: OPERATE (TRX → anten)");
+      } else {
+        Serial.println("⚠️ MODE komutu: MODE TUNE veya MODE OPERATE");
+      }
     }
   }
 }
