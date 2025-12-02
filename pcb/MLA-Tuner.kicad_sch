@@ -90,7 +90,9 @@
     (property "Description" "DDS Signal Generator 0-12.5MHz, Direct Sine Output" (at 220 100 0)
       (effects (font (size 1.27 1.27)) hide))
     ;; Connections:
-    ;; VCC - 5V (or 3.3V check module)
+    ;; VCC - 5V (çoğu modül) veya 3.3V (bazı modüller için Arduino 3.3V pinini kullan)
+    ;; NOT: Modülün voltaj gereksinimini satın almadan önce kontrol edin!
+    ;; Çoğu AliExpress modülü 5V toleranslıdır.
     ;; GND - Ground (4 pins available)
     ;; DAT/SDATA - Arduino Pin 51 (MOSI)
     ;; CLK/SCLK - Arduino Pin 52 (SCK)

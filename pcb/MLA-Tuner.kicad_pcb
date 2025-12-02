@@ -402,7 +402,8 @@
   
   ;; Power tracks (5V, 12V, GND): 1.0mm minimum
   ;; Signal tracks: 0.3mm-0.5mm
-  ;; RF tracks (50Ω): Use coplanar waveguide or controlled impedance
+  ;; RF tracks (50Ω): Use microstrip or coplanar waveguide
+  ;; For 50Ω on 1.6mm FR4 (εr=4.5): track width ~3mm for microstrip
   ;; SPI signals (DDS): 0.25mm, keep short and parallel
 
 )

@@ -66,8 +66,8 @@ Bu klasör, Manyetik Loop Auto-Tuner projesi için PCB tasarım dosyalarını i�
 ### Güç Dağılımı
 
 ```
-5V PSU ─────┬───► Arduino VIN
-            ├───► AD9833 VCC
+5V PSU ─────┬───► Arduino 5V Pin (NOT VIN - VIN requires 7-12V)
+            ├───► AD9833 VCC (5V module) / Arduino 3.3V (3.3V module)
             ├───► AD8307 #1 VCC
             ├───► AD8307 #2 VCC
             ├───► TB6600 PUL+/DIR+/ENA+
@@ -196,8 +196,8 @@ KiCad'de Gerber dosyalarını oluşturmak için:
 
 ## 🔗 İlgili Dökümanlar
 
-- [FULL-WIRING-DIAGRAM.txt](../FULL-WIRING-DIAGRAM.txt) - Detaylı bağlantı şeması
-- [auto-mla-tuner.ino](../code/auto-mla-tuner.ino) - Arduino kaynak kodu
+- [../FULL-WIRING-DIAGRAM.txt](../FULL-WIRING-DIAGRAM.txt) - Detaylı bağlantı şeması
+- [../code/auto-mla-tuner.ino](../code/auto-mla-tuner.ino) - Arduino kaynak kodu
 - [BOM.md](./BOM.md) - Malzeme listesi
 
 ## 📝 Versiyon Geçmişi

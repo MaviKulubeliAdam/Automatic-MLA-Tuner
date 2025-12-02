@@ -80,7 +80,10 @@
 | T1 | Toroid | T50-2 | 1 | Kırmızı (1-30MHz) | Amidon / Ham radio |
 | - | Emaye Tel | 0.5mm | 50cm | Sarım için | Yerel elektronikçi |
 | - | SMA Konnektör | SMA-F | 2 | Giriş/Çıkış | AliExpress |
-| D1-D2 | Schottky Diyot | 1N5711 | 2 | RF dedeksiyon (opsiyonel) | Mouser / DigiKey |
+
+**NOT**: Schottky diyotlar (1N5711) opsiyoneldir ve AD8307 yerine basit
+diode dedektörü kullanmak isteyenler için alternatif bir tasarımdır.
+Bu projede AD8307 kullanıldığından gerekli değildir.
 
 ## OPSİYONEL BİLEŞENLER
 
@@ -108,7 +111,9 @@
 
 ## SİPARİŞ NOTLARI
 
-1. **AD9833 Modülü**: 25MHz kristal versiyonunu tercih edin
+1. **AD9833 Modülü**: 25MHz kristal versiyonunu tercih edin 
+   (25MHz kristal = 12.5MHz maksimum çıkış frekansı, Nyquist teoremi)
+   Bu frekans aralığı HF amatör bantları için idealdir (1.8-30 MHz'in alt yarısı).
 2. **RF Amplifier**: Heatsink ile birlikte alın, 12V/2A güç sağlayın
 3. **AD8307**: Orijinal Analog Devices chip tercih edin (klon kalitesi düşük)
 4. **TB6600**: 4A/40V versiyon yeterli, microstepping DIP switch ayarı var
